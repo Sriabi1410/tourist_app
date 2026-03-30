@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Live Tracking — SafeRoam Admin</title><link rel="stylesheet" href="css/admin.css"></head>
+<body>
+<div class="admin-layout">
+    <nav class="sidebar">
+        <div class="sidebar-header"><span class="logo-icon">🛡️</span><span class="logo-text">SafeRoam</span></div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a></li>
+            <li class="nav-item active"><a href="tracking.html"><span class="nav-icon">📍</span> Live Tracking</a></li>
+            <li class="nav-item"><a href="alerts.html"><span class="nav-icon">🔔</span> Alerts</a></li>
+            <li class="nav-item"><a href="users.html"><span class="nav-icon">👥</span> Users</a></li>
+            <li class="nav-item"><a href="crime-data.html"><span class="nav-icon">🔒</span> Crime Data</a></li>
+            <li class="nav-item"><a href="reports.html"><span class="nav-icon">📈</span> Reports</a></li>
+        </ul>
+        <div class="sidebar-footer"><a href="index.html" class="logout-btn">🚪 Logout</a></div>
+    </nav>
+    <main class="main-content">
+        <header class="top-bar"><h1>Live User Location Tracking</h1><div class="top-bar-right"><span class="live-indicator">🟢 Live</span></div></header>
+        <div class="content">
+            <div class="card" style="height:400px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a2035,#131829);">
+                <div style="text-align:center"><div style="font-size:64px;margin-bottom:16px">🗺️</div><h2 style="color:#b0b8cc">OpenStreetMap Integration</h2><p style="color:#6b7280">Live user locations displayed here</p><p style="color:#6b7280;font-size:12px">3 active users being tracked</p></div>
+            </div>
+            <div class="card">
+                <h2>Active Users</h2>
+                <table class="data-table">
+                    <thead><tr><th>User</th><th>Location</th><th>Coordinates</th><th>Last Update</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td>John Doe</td><td>Connaught Place</td><td>28.6315°N, 77.2167°E</td><td>Just now</td><td><span class="status active">Online</span></td></tr>
+                        <tr><td>Jane Smith</td><td>India Gate</td><td>28.6129°N, 77.2295°E</td><td>2 min ago</td><td><span class="status active">Online</span></td></tr>
+                        <tr><td>Raj Patel</td><td>Red Fort</td><td>28.6562°N, 77.2410°E</td><td>5 min ago</td><td><span class="status responding">Moving</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

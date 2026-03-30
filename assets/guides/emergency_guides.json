@@ -1,0 +1,90 @@
+{
+  "guides": [
+    {
+      "id": "accident",
+      "title": "Road Accident Guide",
+      "category": "Emergency",
+      "icon": "car_crash",
+      "steps": [
+        {
+          "step": 1,
+          "title": "Ensure Safety First",
+          "content": "Move away from traffic. Turn on hazard lights. Do not move injured people unless there is immediate danger (fire/flood)."
+        },
+        {
+          "step": 2,
+          "title": "Call Emergency Services",
+          "content": "Call 112 (India) or local emergency number. State your location clearly. Stay on the line."
+        },
+        {
+          "step": 3,
+          "title": "Document the Scene",
+          "content": "Photograph vehicle positions, damage, and road conditions. Note time and location. Collect witness contact info."
+        },
+        {
+          "step": 4,
+          "title": "Basic First Aid",
+          "content": "Apply pressure to bleeding wounds. Do not give food or water to injured. Keep them warm and calm until help arrives."
+        }
+      ]
+    },
+    {
+      "id": "medical",
+      "title": "Medical Emergency Guide",
+      "category": "Medical",
+      "icon": "medical_services",
+      "steps": [
+        {
+          "step": 1,
+          "title": "Assess the Situation",
+          "content": "Check if the person is conscious and breathing. Call 108 (Ambulance) immediately."
+        },
+        {
+          "step": 2,
+          "title": "CPR if Needed",
+          "content": "30 chest compressions, 2 rescue breaths. Push hard and fast — 100-120 compressions per minute."
+        },
+        {
+          "step": 3,
+          "title": "Recovery Position",
+          "content": "If breathing but unconscious, place on their side to prevent choking. Monitor breathing continuously."
+        }
+      ]
+    },
+    {
+      "id": "disaster",
+      "title": "Natural Disaster Guide",
+      "category": "Disaster",
+      "icon": "water",
+      "sections": {
+        "earthquake": [
+          "DROP to hands and knees",
+          "Take COVER under desk or against interior wall",
+          "HOLD ON until shaking stops",
+          "Stay away from windows and exterior walls"
+        ],
+        "flood": [
+          "Move to higher ground immediately",
+          "Do not walk through flowing water",
+          "Avoid flooded roads",
+          "Turn off utilities at main switch"
+        ],
+        "cyclone": [
+          "Stay indoors away from windows",
+          "Go to the lowest floor",
+          "Have emergency kit ready",
+          "Monitor official weather updates"
+        ]
+      }
+    }
+  ],
+  "emergency_phrases": {
+    "en": { "help": "Help!", "emergency": "Call an ambulance!", "police": "Call the police!", "fire": "Fire! Evacuate!" },
+    "hi": { "help": "मदद!", "emergency": "एम्बुलेंस बुलाओ!", "police": "पुलिस को बुलाओ!", "fire": "आग! भागो!" },
+    "es": { "help": "¡Ayuda!", "emergency": "¡Llame a una ambulancia!", "police": "¡Llame a la policía!", "fire": "¡Fuego! ¡Evacúen!" },
+    "fr": { "help": "Au secours!", "emergency": "Appelez une ambulance!", "police": "Appelez la police!", "fire": "Feu! Évacuez!" },
+    "ar": { "help": "مساعدة!", "emergency": "اتصل بالإسعاف!", "police": "اتصل بالشرطة!", "fire": "حريق! إخلاء!" },
+    "zh": { "help": "救命!", "emergency": "叫救护车!", "police": "叫警察!", "fire": "着火了！疏散！" },
+    "ja": { "help": "助けて!", "emergency": "救急車を呼んで!", "police": "警察を呼んで!", "fire": "火事！避難して！" }
+  }
+}
