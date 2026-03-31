@@ -1,19 +1,32 @@
 const express = require('express');
 const router = express.Router();
 const { auth } = require('../middleware/auth');
-
-const locationLogs = [];
+const db = require('../store/db');
+const { firestore } = require('../firebase_admin');
 
 router.post('/update', auth, (req, res) => {
   const { latitude, longitude, address } = req.body;
-  const log = { userId: req.user.id, latitude, longitude, address, timestamp: new Date().toISOString() };
-  locationLogs.push(log);
-  res.json({ message: 'Location updated', location: log });
+  const user = db.updateUserLocation(req.user.id, latitude, longitude, address);
+
+  if (user) {
+    if (firestore) {
+      firestore.collection('locations').add({
+        userId: req.user.id,
+        latitude,
+        longitude,
+        address,
+        updatedAt: new Date().toISOString(),
+      }).catch((err) => console.warn('Firestore location sync failed:', err.message || err));
+    }
+    req.app.get('io').emit('location_update', user);
+  }
+
+  res.json({ message: 'Location updated', user });
 });
 
 router.get('/history', auth, (req, res) => {
-  const userLogs = locationLogs.filter(l => l.userId === req.user.id).slice(-50);
-  res.json({ locations: userLogs });
+  // Not used in standard mock flow right now, returning full users instead for history
+  res.json({ locations: [] });
 });
 
 router.get('/nearby', (req, res) => {
@@ -38,7 +51,8 @@ router.post('/share', auth, (req, res) => {
 
 // Admin: all locations
 router.get('/all', (req, res) => {
-  res.json({ locations: locationLogs.slice(-100), total: locationLogs.length });
+  const users = db.getUsers();
+  res.json({ users, total: users.length });
 });
 
 module.exports = router;

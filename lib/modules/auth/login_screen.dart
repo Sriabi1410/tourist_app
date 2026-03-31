@@ -34,6 +34,10 @@ class _LoginScreenState extends State<LoginScreen> {
     final success = await auth.login(_emailCtrl.text, _passCtrl.text);
     if (success && mounted) {
       Navigator.pushReplacementNamed(context, AppRoutes.home);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(auth.errorMessage.isNotEmpty ? auth.errorMessage : 'Login failed.')),
+      );
     }
   }
 

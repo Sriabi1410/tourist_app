@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Live Tracking — SafeTravel Admin</title>
+<link rel="stylesheet" href="../css/design-system.css"/>
+<style>
+.tracker-map { height: 420px; background: var(--bg3); border-radius: var(--radius-lg); position: relative; overflow: hidden; border: 1px solid var(--border); }
+.map-grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 30px 30px; }
+.map-pin { position: absolute; transform: translate(-50%,-100%); cursor: pointer; transition: transform 0.2s; }
+.map-pin:hover { transform: translate(-50%,-100%) scale(1.2); z-index: 10; }
+.pin-bubble { width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+.pin-inner { transform: rotate(45deg); font-size: 14px; }
+.pin-label { font-size: 9px; font-weight: 700; background: var(--surface2); border: 1px solid var(--border); padding: 2px 5px; border-radius: 4px; margin-top: 3px; white-space: nowrap; color: var(--text2); text-align: center; }
+.map-legend { position: absolute; bottom: 12px; left: 12px; background: rgba(8,12,20,0.9); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; display: flex; gap: 14px; }
+.map-controls { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; gap: 6px; }
+.map-btn { width: 32px; height: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: var(--text2); transition: all 0.15s; }
+.map-btn:hover { background: var(--surface2); color: var(--text); }
+.user-row-sos td { background: rgba(239,68,68,0.05); }
+.filter-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.pill { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.online-pulse { display: inline-block; width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: liveBlink 1.5s infinite; margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">🛡️</div>
+      <div><div class="logo-text">SafeTravel</div><div class="logo-sub">Admin Portal</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a class="nav-item active" href="live-tracking.html"><span class="nav-icon">📍</span> Live Tracking<span class="nav-badge" id="onlineCount">—</span></a>
+      <a class="nav-item" href="sos-alerts.html"><span class="nav-icon">🆘</span> SOS Alerts<span class="nav-badge" id="sosCount">—</span></a>
+      <div class="nav-section-label">Management</div>
+      <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+      <a class="nav-item" href="alert-management.html"><span class="nav-icon">📢</span> Broadcast Alerts</a>
+      <a class="nav-item" href="crime-data.html"><span class="nav-icon">⚠️</span> Crime Data</a>
+      <div class="nav-section-label">Intelligence</div>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+      <a class="nav-item" href="zones.html"><span class="nav-icon">🗺️</span> Safety Zones</a>
+      <div class="nav-section-label">System</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+      <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff">A</div>
+        <div><div class="user-name">Admin User</div><div class="user-role">Super Administrator</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Live Tracking</div>
+        <span class="topbar-subtitle">Real-time tourist location monitoring</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="live-dot">LIVE</div>
+        <button class="btn btn-ghost btn-sm" onclick="loadData()">↻ Refresh</button>
+        <button class="btn btn-danger btn-sm" onclick="openModal('broadcastModal')">📢 Broadcast Alert</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- Stats -->
+      <div class="stats-grid mb-6" style="grid-template-columns:repeat(5,1fr)">
+        <div class="stat-card blue"><div class="stat-icon blue">👥</div><div class="stat-value" id="stat-total" style="color:var(--accent)">—</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card green"><div class="stat-icon green">🟢</div><div class="stat-value text-green" id="stat-online">—</div><div class="stat-label">Online Now</div></div>
+        <div class="stat-card red"><div class="stat-icon red">🆘</div><div class="stat-value text-red" id="stat-sos">—</div><div class="stat-label">SOS Active</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">📍</div><div class="stat-value" id="stat-sharing" style="color:var(--amber)">—</div><div class="stat-label">Sharing Location</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:rgba(139,92,246,0.15)">⏱</div><div class="stat-value" id="stat-response" style="color:var(--purple)">4.2m</div><div class="stat-label">Avg Response</div></div>
+      </div>
+
+      <!-- Map -->
+      <div class="card mb-6">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Live User Map</div>
+            <div class="card-subtitle">Real-time tourist location pins</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="live-dot">LIVE</div>
+            <button class="btn btn-ghost btn-sm" onclick="toggleSatellite()">🗺️ Toggle View</button>
+          </div>
+        </div>
+        <div class="tracker-map" id="trackingMap">
+          <div class="map-grid-bg"></div>
+          <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.25" viewBox="0 0 800 420">
+            <line x1="150" y1="0" x2="150" y2="420" stroke="#334155" stroke-width="14"/>
+            <line x1="0" y1="180" x2="800" y2="180" stroke="#334155" stroke-width="14"/>
+            <line x1="0" y1="300" x2="800" y2="300" stroke="#334155" stroke-width="8"/>
+            <line x1="500" y1="0" x2="500" y2="420" stroke="#334155" stroke-width="8"/>
+            <line x1="650" y1="180" x2="650" y2="420" stroke="#334155" stroke-width="6"/>
+          </svg>
+          <div id="mapPins"></div>
+          <div class="map-legend">
+            <span style="font-size:11px;color:#fca5a5">🔴 SOS</span>
+            <span style="font-size:11px;color:#93c5fd">🔵 Online</span>
+            <span style="font-size:11px;color:#6ee7b7">🟢 Checked In</span>
+            <span style="font-size:11px;color:#fcd34d">🟡 Missed</span>
+          </div>
+          <div class="map-controls">
+            <div class="map-btn" onclick="showToast('Zoom in','info')">+</div>
+            <div class="map-btn" onclick="showToast('Zoom out','info')">−</div>
+            <div class="map-btn" onclick="showToast('Reset view','info')">⌖</div>
+          </div>
+          <div style="position:absolute;top:12px;left:12px;background:rgba(8,12,20,0.85);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--text3)">
+            📍 <span id="locationCount">0</span> locations tracked
+          </div>
+        </div>
+      </div>
+
+      <!-- User table -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Tracked Users</div>
+            <div class="card-subtitle">All users with known location data</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div class="search-bar" style="width:220px">
+              <span class="search-icon">🔍</span>
+              <input type="text" placeholder="Search users..." oninput="filterTable(this.value)" id="searchInput"/>
+            </div>
+          </div>
+        </div>
+        <div class="filter-pills" id="filterPills">
+          <div class="pill active" onclick="setFilter('all',this)">All</div>
+          <div class="pill" onclick="setFilter('SOS',this)">🆘 SOS Active</div>
+          <div class="pill" onclick="setFilter('Online',this)">🟢 Online</div>
+          <div class="pill" onclick="setFilter('Checked In',this)">✓ Checked In</div>
+          <div class="pill" onclick="setFilter('Offline',this)">⚫ Offline</div>
+        </div>
+        <div class="table-wrap">
+          <table id="trackingTable">
+            <thead>
+              <tr>
+                <th>User</th><th>Status</th><th>Last Location</th><th>Coordinates</th><th>Last Update</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="trackingBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Broadcast Modal -->
+<div class="modal-overlay" id="broadcastModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📢 Broadcast Alert</div>
+      <button class="modal-close" onclick="closeModal('broadcastModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="input-group"><label class="input-label">Alert Type</label>
+        <select class="input" id="bAlertType"><option>Crime Warning</option><option>Weather Alert</option><option>Traffic / Road Closure</option><option>Natural Disaster</option><option>General Safety</option></select></div>
+      <div class="input-group"><label class="input-label">Alert Title</label><input class="input" id="bTitle" placeholder="e.g. Pickpocket Alert — Central Market"/></div>
+      <div class="input-group"><label class="input-label">Message</label><textarea class="input" id="bMessage" rows="3" placeholder="Describe the alert..."></textarea></div>
+      <div class="input-group"><label class="input-label">Severity</label>
+        <select class="input" id="bSeverity"><option value="high">HIGH — Immediate Danger</option><option value="medium">MEDIUM — Exercise Caution</option><option value="low">LOW — Informational</option></select></div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn btn-ghost" style="flex:1" onclick="closeModal('broadcastModal')">Cancel</button>
+        <button class="btn btn-danger" style="flex:1" onclick="broadcastAlert()">📢 Broadcast Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const API = 'http://localhost:3000/api';
+const socket = io('http://localhost:3000');
+let allUsers = [], activeFilter = 'all';
+
+socket.on('location_update', (user) => {
+  const idx = allUsers.findIndex(u => u.id === user.id);
+  if (idx !== -1) {
+    allUsers[idx] = user;
+  } else {
+    allUsers.push(user);
+  }
+  loadData(false); // Update UI without API recall
+});
+
+socket.on('sos_alert', (emergency) => {
+  showToast(`🔴 New SOS Alert from ${emergency.userId}`, 'error');
+  loadData(true);
+});
+
+// Removed static mockUsers array
+
+const pinPositions = [
+  {left:'44%',top:'52%'},{left:'58%',top:'60%'},{left:'62%',top:'38%'},{left:'78%',top:'55%'},
+  {left:'72%',top:'68%'},{left:'78%',top:'68%'},{left:'38%',top:'70%'},{left:'32%',top:'48%'}
+];
+
+const statusColors = { SOS:'#ef4444', Online:'#3b82f6', 'Checked In':'#10b981', Offline:'#4d6080', Missed:'#f59e0b' };
+const statusEmoji = { SOS:'🆘', Online:'👤', 'Checked In':'✓', Offline:'👤', Missed:'⚠️' };
+const statusBadge = s => { const m={SOS:'red',Online:'green','Checked In':'blue',Missed:'amber',Offline:'gray'}; return `<span class="badge ${m[s]||'gray'}">${s}</span>`; };
+
+async function loadData(fetchRemote = true) {
+  if (fetchRemote) {
+    try {
+      const [dashRes, locRes] = await Promise.allSettled([
+        fetch(`${API}/admin/dashboard`),
+        fetch(`${API}/locations/all`)
+      ]);
+      if (dashRes.status === 'fulfilled' && dashRes.value.ok) {
+        const dash = await dashRes.value.json();
+        document.getElementById('stat-total').textContent = dash.stats?.totalUsers || 0;
+        document.getElementById('stat-sos').textContent = dash.stats?.activeEmergencies || 0;
+      }
+      if (locRes.status === 'fulfilled' && locRes.value.ok) {
+        const loc = await locRes.value.json();
+        allUsers = loc.users || [];
+      }
+    } catch {
+      console.error('Failed to load data from API');
+    }
+  }
+
+  const online = allUsers.filter(u => u.status === 'Online' || u.status === 'Checked In').length;
+  document.getElementById('stat-online').textContent = online;
+  document.getElementById('stat-sharing').textContent = allUsers.filter(u=>u.status!=='Offline').length;
+  document.getElementById('onlineCount').textContent = online;
+  document.getElementById('sosCount').textContent = allUsers.filter(u=>u.status==='SOS').length;
+  document.getElementById('locationCount').textContent = allUsers.length;
+  renderMap();
+  renderTable(allUsers);
+}
+
+function renderMap() {
+  const pins = allUsers.map((u,i) => {
+    const pos = pinPositions[i % pinPositions.length];
+    const col = statusColors[u.status] || '#4d6080';
+    const em = statusEmoji[u.status] || '👤';
+    return `<div class="map-pin" style="left:${pos.left};top:${pos.top}" title="${u.name} — ${u.status}" onclick="focusUser('${u.name}')">
+      <div class="pin-bubble" style="background:${col}"><div class="pin-inner">${em}</div></div>
+      <div class="pin-label" style="color:${col}">${u.initials}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('mapPins').innerHTML = pins;
+}
+
+function renderTable(data) {
+  document.getElementById('trackingBody').innerHTML = data.map(u => `
+    <tr class="${u.status==='SOS'?'user-row-sos':''}">
+      <td><div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:${u.color}22;color:${u.color};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">${u.init||'U'}</div>
+        <div><div style="font-weight:600;color:var(--text);font-size:13px">${u.nationality||''} ${u.name}</div><div style="font-size:11px;color:var(--text3)">${u.email||u.phone||''}</div></div>
+      </div></td>
+      <td>${statusBadge(u.status)}</td>
+      <td style="font-size:12px;color:var(--text2)">${u.location||'Unknown'}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${u.latitude||'--'}, ${u.longitude||'--'}</td>
+      <td style="font-size:12px;color:var(--text3)">${u.lastSeen||'--'}</td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="openMap('${u.latitude}','${u.longitude}')">📍 Map</button>
+        ${u.status==='SOS'?`<button class="btn btn-danger btn-sm" onclick="respondSOS('${u.name}')">🚑 Respond</button>`:''}
+      </div></td>
+    </tr>`).join('');
+}
+
+function setFilter(filter, el) {
+  activeFilter = filter;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+function filterTable(q) { applyFilters(q); }
+function applyFilters(q = document.getElementById('searchInput').value) {
+  let data = allUsers;
+  if (activeFilter !== 'all') data = data.filter(u => u.status === activeFilter);
+  if (q) data = data.filter(u => u.name.toLowerCase().includes(q.toLowerCase()) || u.location.toLowerCase().includes(q.toLowerCase()));
+  renderTable(data);
+}
+
+function openMap(lat, lng) { window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank'); }
+function focusUser(name) { showToast(`Focusing on ${name}`, 'info'); }
+function respondSOS(name) { showToast(`SOS response dispatched for ${name}`, 'success'); }
+function toggleSatellite() { showToast('Map view toggled', 'info'); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function broadcastAlert() {
+  const title = document.getElementById('bTitle').value;
+  const message = document.getElementById('bMessage').value;
+  const severity = document.getElementById('bSeverity').value;
+  const type = document.getElementById('bAlertType').value;
+  if (!title || !message) { showToast('Please fill title and message','error'); return; }
+  try {
+    await fetch(`${API}/admin/alerts/broadcast`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ title, message, severity, area: 'All Users', type })
+    });
+  } catch {}
+  closeModal('broadcastModal');
+  showToast(`Alert broadcast sent: "${title}"`, 'success');
+}
+
+function showToast(msg, type='success') {
+  const icons = {success:'✓',error:'✕',info:'ℹ'};
+  const colors = {success:'var(--green)',error:'var(--red)',info:'var(--accent)'};
+  const t = document.createElement('div'); t.className = 'toast';
+  t.innerHTML = `<span style="color:${colors[type]}">${icons[type]}</span> <span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+loadData();
+setInterval(loadData, 30000); // auto-refresh every 30s
+</script>
+</body>
+</html>

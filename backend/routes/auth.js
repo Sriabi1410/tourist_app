@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const { firestore } = require('../firebase_admin');
 
 // In-memory store (replace with Firebase Firestore in production)
 const users = new Map();
@@ -22,6 +23,18 @@ router.post('/register', async (req, res) => {
     const userId = `USR-${uuidv4().slice(0, 8)}`;
     const user = { id: userId, name, email, phone, nationality, password: hashedPassword, role: 'user', createdAt: new Date().toISOString() };
     users.set(email, user);
+
+    if (typeof firestore !== 'undefined' && firestore) {
+      firestore.collection('users').doc(userId).set({
+        id: userId,
+        name,
+        email,
+        phone,
+        nationality,
+        role: 'user',
+        createdAt: user.createdAt,
+      }).catch((err) => console.warn('Firestore user sync failed:', err.message || err));
+    }
 
     // Generate OTP
     const otp = String(Math.floor(100000 + Math.random() * 900000));

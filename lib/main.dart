@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -11,8 +13,10 @@ import 'core/providers/medical_provider.dart';
 import 'core/providers/checkin_provider.dart';
 import 'core/providers/settings_provider.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await _initializeFirebaseMessaging();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -54,5 +58,21 @@ class SafeRoamApp extends StatelessWidget {
         routes: AppRoutes.routes,
       ),
     );
+  }
+}
+
+Future<void> _initializeFirebaseMessaging() async {
+  try {
+    final messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission(alert: true, badge: true, sound: true);
+    final token = await messaging.getToken();
+    if (token != null) {
+      debugPrint('FCM token: $token');
+    }
+    FirebaseMessaging.onMessage.listen((message) {
+      debugPrint('Foreground FCM message: ${message.notification?.title} - ${message.notification?.body}');
+    });
+  } catch (error) {
+    debugPrint('Firebase Messaging initialization failed: $error');
   }
 }

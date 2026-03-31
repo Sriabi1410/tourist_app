@@ -5,6 +5,10 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
+const db = require('./store/db');
+const { admin, firestore } = require('./firebase_admin');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -18,6 +22,17 @@ const checkinRoutes = require('./routes/checkin');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+app.set('io', io);
+
+io.on('connection', (socket) => {
+  console.log(`⚡ Socket client connected: ${socket.id}`);
+  socket.on('disconnect', () => {
+    console.log(`🔌 Socket client disconnected: ${socket.id}`);
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
@@ -48,6 +63,9 @@ app.use('/api/admin', adminRoutes);
 
 // ─── Admin Dashboard (Static Files) ────────────────────────────────────────
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
+
+// ─── Police Dashboard (Static Files) ────────────────────────────────────────
+app.use('/police', express.static(path.join(__dirname, 'police')));
 
 // ─── Health Check ───────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
@@ -83,10 +101,11 @@ app.use((req, res) => {
 });
 
 // ─── Start Server ───────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`\n🛡️  SafeRoam API running on http://localhost:${PORT}`);
-  console.log(`📊 Admin Dashboard: http://localhost:${PORT}/admin`);
-  console.log(`💚 Health Check: http://localhost:${PORT}/api/health\n`);
+  console.log(`📊 Admin Dashboard:  http://localhost:${PORT}/admin`);
+  console.log(`🚔 Police Dashboard: http://localhost:${PORT}/police`);
+  console.log(`💚 Health Check:     http://localhost:${PORT}/api/health\n`);
 });
 
-module.exports = app;
+module.exports = server;

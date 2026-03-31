@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:provider/provider.dart';
 import '../../app/colors.dart';
 import '../../app/routes.dart';
+import '../../core/providers/auth_provider.dart';
+import '../../core/providers/location_provider.dart';
+import '../../core/providers/emergency_provider.dart';
 import '../../widgets/glass_card.dart';
 
 class OfflineDataScreen extends StatelessWidget {
@@ -22,21 +26,22 @@ class OfflineDataScreen extends StatelessWidget {
         const SizedBox(height: 20),
         FadeInUp(delay: const Duration(milliseconds: 100), child: const Text('Offline Storage', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700))),
         const SizedBox(height: 12),
-        ...[ ('Emergency Contacts', '12 contacts saved', Icons.contacts, AppColors.primary, '24 KB'),
-             ('Offline Maps', '2 regions downloaded', Icons.map, AppColors.info, '97 MB'),
-             ('Safety Guides', '5 guides cached', Icons.menu_book, AppColors.secondary, '3.2 MB'),
-             ('Location Logs', '48 entries', Icons.location_on, AppColors.accentWarm, '156 KB'),
-             ('Emergency Logs', '0 pending uploads', Icons.sos, AppColors.sosRed, '0 KB'),
+        ...[
+          {'title': 'Emergency Contacts', 'subtitle': '${context.watch<AuthProvider>().emergencyContacts.length} contacts saved', 'icon': Icons.contacts, 'color': AppColors.primary, 'meta': '24 KB'},
+          {'title': 'Offline Maps', 'subtitle': '2 regions downloaded', 'icon': Icons.map, 'color': AppColors.info, 'meta': '97 MB'},
+          {'title': 'Safety Guides', 'subtitle': '5 guides cached', 'icon': Icons.menu_book, 'color': AppColors.secondary, 'meta': '3.2 MB'},
+          {'title': 'Location Logs', 'subtitle': '${context.watch<LocationProvider>().locationHistory.length} entries', 'icon': Icons.location_on, 'color': AppColors.accentWarm, 'meta': '156 KB'},
+          {'title': 'Emergency Logs', 'subtitle': '${context.watch<EmergencyProvider>().pendingSosEvents.length} pending uploads', 'icon': Icons.sos, 'color': AppColors.sosRed, 'meta': '${context.watch<EmergencyProvider>().pendingSosEvents.length * 3} KB'},
         ].asMap().entries.map((e) => FadeInUp(delay: Duration(milliseconds: 150 + e.key * 60), child: Padding(padding: const EdgeInsets.only(bottom: 10),
           child: GlassCard(child: Row(children: [
-            Container(width: 40, height: 40, decoration: BoxDecoration(color: e.value.$4.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
-              child: Icon(e.value.$3, color: e.value.$4, size: 20)),
+            Container(width: 40, height: 40, decoration: BoxDecoration(color: (e.value['color'] as Color).withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+              child: Icon(e.value['icon'] as IconData, color: e.value['color'] as Color, size: 20)),
             const SizedBox(width: 14),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(e.value.$1, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
-              Text(e.value.$2, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
+              Text(e.value['title'] as String, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+              Text(e.value['subtitle'] as String, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
             ])),
-            Text(e.value.$5, style: const TextStyle(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w500)),
+            Text(e.value['meta'] as String, style: const TextStyle(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w500)),
           ]))))),
         const SizedBox(height: 14),
         FadeInUp(delay: const Duration(milliseconds: 500), child: Row(children: [

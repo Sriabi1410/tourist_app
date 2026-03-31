@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Missing Persons — Police Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#06080f;--bg2:#090d18;--bg3:#0d1220;--surface:#101828;--surface2:#162035;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8edf5;--text2:#7a92b0;--text3:#3d5070;--police:#1e3a6b;--police-light:#2563b0;--gold:#d4a017;--red:#dc2626;--green:#059669;--amber:#d97706;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--sidebar-w:260px;--radius:12px;--radius-lg:18px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.sidebar-logo{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.logo-badge{width:44px;height:44px;background:linear-gradient(145deg,var(--police),var(--police-light));border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.logo-text{font-weight:800;font-size:15px;}.logo-sub{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:.8px;text-transform:uppercase;}
+.sidebar-nav{flex:1;padding:10px 0;overflow-y:auto;}
+.nav-section{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:14px 18px 5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;color:var(--text2);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.nav-item:hover{background:var(--surface);color:var(--text);}.nav-item.active{background:var(--surface);color:var(--text);border-left-color:var(--gold);}
+.nav-icon{font-size:15px;width:20px;text-align:center;}.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;}
+.sidebar-officer{padding:14px 18px;border-top:1px solid var(--border);}
+.officer-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.officer-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--police),var(--police-light));border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.officer-nm{font-size:13px;font-weight:600;}.officer-rank{font-size:10px;color:var(--gold);}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+.topbar{height:62px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:50;}
+.topbar-left{flex:1;}.topbar-title{font-size:17px;font-weight:800;}.topbar-sub{font-size:11px;color:var(--text3);}
+.content{padding:24px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-police{background:linear-gradient(135deg,var(--police),var(--police-light));color:#fff;}.btn-police:hover{transform:translateY(-1px);}
+.btn-red{background:rgba(220,38,38,.15);color:#fca5a5;border:1px solid rgba(220,38,38,.25);}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
+.btn-green{background:rgba(5,150,105,.15);color:#6ee7b7;border:1px solid rgba(5,150,105,.25);}
+.btn-amber{background:rgba(217,119,6,.15);color:#fcd34d;border:1px solid rgba(217,119,6,.25);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.badge-red{background:rgba(220,38,38,.12);color:#fca5a5;}.badge-red::before{background:var(--red);}
+.badge-amber{background:rgba(217,119,6,.12);color:#fcd34d;}.badge-amber::before{background:var(--amber);}
+.badge-green{background:rgba(5,150,105,.12);color:#6ee7b7;}.badge-green::before{background:var(--green);}
+.badge-blue{background:rgba(37,99,176,.15);color:#93c5fd;}.badge-blue::before{background:var(--police-light);}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;}
+.stat-val{font-size:26px;font-weight:800;letter-spacing:-1px;margin-top:8px;}
+.stat-lbl{font-size:11px;color:var(--text3);}
+.mp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:12px;transition:all .2s;position:relative;overflow:hidden;}
+.mp-card:hover{border-color:var(--border2);transform:translateY(-1px);}
+.mp-card.critical{border-color:rgba(220,38,38,.35);background:linear-gradient(135deg,rgba(220,38,38,.05),var(--surface));}
+.mp-card.critical::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--red);}
+.mp-card.searching{border-color:rgba(217,119,6,.3);}
+.mp-card.searching::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--amber);}
+.mp-card.found::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green);}
+.input{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:9px 13px;border-radius:var(--radius);font-family:var(--font);font-size:13px;width:100%;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;width:90%;max-width:500px;animation:mIn .2s ease;}
+@keyframes mIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:13px;animation:tIn .3s ease;min-width:220px;}
+@keyframes tIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">🚔</div>
+    <div><div class="logo-text">Police Portal</div><div class="logo-sub">SafeTravel LEO</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Dispatch</div>
+    <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Command Center</a>
+    <a class="nav-item" href="sos-feed.html"><span class="nav-icon">🆘</span> SOS Feed<span class="nav-badge">3</span></a>
+    <a class="nav-item" href="map.html"><span class="nav-icon">📍</span> Live Map</a>
+    <a class="nav-item" href="dispatch.html"><span class="nav-icon">🚔</span> Dispatch Units</a>
+    <div class="nav-section">Incidents</div>
+    <a class="nav-item" href="incidents.html"><span class="nav-icon">📋</span> Incident Log</a>
+    <a class="nav-item" href="crime-reports.html"><span class="nav-icon">⚠️</span> Crime Reports</a>
+    <a class="nav-item" href="tourists.html"><span class="nav-icon">👥</span> Tourists</a>
+    <a class="nav-item active" href="missing.html"><span class="nav-icon">🔍</span> Missing Persons</a>
+    <div class="nav-section">Station</div>
+    <a class="nav-item" href="officers.html"><span class="nav-icon">👮</span> Officers</a>
+    <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+    <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+  </nav>
+  <div class="sidebar-officer">
+    <div class="officer-card">
+      <div class="officer-av">👮</div>
+      <div><div class="officer-nm">Insp. Rajesh Kumar</div><div class="officer-rank">Badge #4721 · South Div.</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Missing Persons</div>
+      <div class="topbar-sub">Active search cases — South Division</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn btn-ghost btn-sm" onclick="loadData()">↻ Refresh</button>
+      <button class="btn btn-red" onclick="openModal('addModal')">+ New Missing Report</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="stats-row">
+      <div class="stat" style="border-top:2px solid var(--red)">
+        <div style="font-size:18px">🔴</div><div class="stat-val" style="color:var(--red)" id="mActive">—</div><div class="stat-lbl">Active Cases</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--amber)">
+        <div style="font-size:18px">🔍</div><div class="stat-val" style="color:var(--amber)" id="mSearching">—</div><div class="stat-lbl">Search Ongoing</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--green)">
+        <div style="font-size:18px">✓</div><div class="stat-val" style="color:var(--green)" id="mFound">—</div><div class="stat-lbl">Found This Month</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--gold)">
+        <div style="font-size:18px">⏱</div><div class="stat-val" style="color:var(--gold)">4.2h</div><div class="stat-lbl">Avg Resolution</div>
+      </div>
+    </div>
+
+    <div id="missingList"></div>
+  </div>
+</div>
+
+<!-- Add Missing Report Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:800">🔍 New Missing Person Report</div>
+      <button onclick="closeModal('addModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Full Name</label><input class="input" id="mpName" placeholder="Tourist full name"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Nationality</label><input class="input" id="mpNat" placeholder="e.g. India"/></div>
+        <div><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Phone</label><input class="input" id="mpPhone" placeholder="+91 ..."/></div>
+      </div>
+      <div><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Last Known Location</label><input class="input" id="mpLoc" placeholder="Area, landmark"/></div>
+      <div><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Description</label><textarea class="input" id="mpDesc" rows="2" placeholder="Physical description, clothing..."></textarea></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" style="flex:1" onclick="closeModal('addModal')">Cancel</button>
+        <button class="btn btn-red" style="flex:1" onclick="addMissing()">🔍 File Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+let missing = [
+  {id:'MP-014',name:'John Doe',flag:'🇺🇸',phone:'+1 555 012 3456',lastLoc:'Airport Area',lastSeen:'1h 25m ago',status:'critical',unit:'Unit 09',desc:'Male, 35yrs, blue jacket, red backpack. Missed 2 check-ins.',init:'JD',color:'#dc2626'},
+  {id:'MP-013',name:'Hiroshi Nakamura',flag:'🇯🇵',phone:'+81 80 5555 1234',lastLoc:'Majestic Bus Stand',lastSeen:'3h ago',status:'searching',unit:'Unit 03',desc:'Male, 28yrs, white shirt, black trousers. Last seen near ticket counter.',init:'HN',color:'#d97706'},
+  {id:'MP-012',name:'Anna Schmidt',flag:'🇩🇪',phone:'+49 176 555 0012',lastLoc:'Brigade Road',lastSeen:'Yesterday',status:'found',unit:'Unit 07',desc:'Female, 24yrs. Found safe at hotel. Case closed.',init:'AS',color:'#059669'},
+  {id:'MP-011',name:'Carlos Mendez',flag:'🇲🇽',phone:'+52 55 1234 5678',lastLoc:'Cubbon Park',lastSeen:'2 days ago',status:'found',unit:'Unit 12',desc:'Male, 42yrs. Found at hospital. Treated for heat exhaustion.',init:'CM',color:'#059669'},
+];
+
+function loadData() {
+  document.getElementById('mActive').textContent = missing.filter(m=>m.status==='critical').length;
+  document.getElementById('mSearching').textContent = missing.filter(m=>m.status==='searching').length;
+  document.getElementById('mFound').textContent = missing.filter(m=>m.status==='found').length;
+  renderList();
+}
+
+function renderList() {
+  const statusLabel={critical:'CRITICAL — Missing >1hr',searching:'Search Ongoing',found:'Found — Case Closed'};
+  const statusBadge={critical:'badge-red',searching:'badge-amber',found:'badge-green'};
+  document.getElementById('missingList').innerHTML = missing.map(m=>`
+    <div class="mp-card ${m.status}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:48px;height:48px;border-radius:50%;background:${m.color}20;color:${m.color};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0">${m.init}</div>
+          <div>
+            <div style="font-weight:700;font-size:15px;color:var(--text)">${m.flag} ${m.name}</div>
+            <div style="font-size:11px;color:var(--text3)">${m.phone} · ID: ${m.id}</div>
+          </div>
+        </div>
+        <span class="badge ${statusBadge[m.status]}">${statusLabel[m.status]}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:var(--bg3);border-radius:10px;padding:10px 12px">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Last Location</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-top:4px">📍 ${m.lastLoc}</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:10px 12px">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Last Seen</div>
+          <div style="font-size:13px;font-weight:600;color:${m.status==='critical'?'var(--red)':'var(--text)'};margin-top:4px">⏱ ${m.lastSeen}</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:10px 12px">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Assigned Unit</div>
+          <div style="font-size:13px;font-weight:600;color:#93c5fd;margin-top:4px">🚔 ${m.unit}</div>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text2);margin-bottom:12px">${m.desc}</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="toast('Calling ${m.name}...','info')">📞 Call</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.open('https://maps.google.com/?q=12.97,77.59','_blank')">📍 Last Location</button>
+        <button class="btn btn-police btn-sm" onclick="dispatchSearch('${m.id}')">🚔 Dispatch Search</button>
+        ${m.status!=='found'?`<button class="btn btn-green btn-sm" style="margin-left:auto" onclick="markFound('${m.id}')">✓ Mark Found</button>`:'<span style="margin-left:auto;font-size:12px;color:var(--green);align-self:center">✓ Resolved</span>'}
+      </div>
+    </div>`).join('');
+}
+
+function addMissing() {
+  const name=document.getElementById('mpName').value.trim();
+  if(!name){toast('Please enter a name','error');return;}
+  missing.unshift({
+    id:`MP-${String(missing.length+15).padStart(3,'0')}`,
+    name, flag:'🏳️', phone:document.getElementById('mpPhone').value||'N/A',
+    lastLoc:document.getElementById('mpLoc').value||'Unknown',
+    lastSeen:'Just now', status:'critical', unit:'Pending',
+    desc:document.getElementById('mpDesc').value||'No additional description.',
+    init:name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2),
+    color:'#dc2626'
+  });
+  closeModal('addModal'); loadData();
+  ['mpName','mpPhone','mpLoc','mpDesc'].forEach(id=>document.getElementById(id).value='');
+  toast(`Missing report filed: ${name}`,'success');
+}
+
+function markFound(id) {
+  const m=missing.find(x=>x.id===id); if(m) m.status='found';
+  loadData(); toast(`${id} — Marked as found`,'success');
+}
+function dispatchSearch(id){toast(`Search unit dispatched for case ${id}`,'success');}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toast(msg,type='info'){
+  const c={success:'var(--green)',error:'var(--red)',info:'var(--police-light)'};
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span style="color:${c[type]}">${type==='success'?'✓':type==='error'?'✕':'ℹ'}</span> <span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+loadData();
+</script>
+</body>
+</html>

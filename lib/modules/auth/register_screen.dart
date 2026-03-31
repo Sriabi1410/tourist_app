@@ -58,6 +58,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
     if (success && mounted) {
       Navigator.pushReplacementNamed(context, AppRoutes.otpVerify);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(auth.errorMessage.isNotEmpty ? auth.errorMessage : 'Registration failed.')),
+      );
     }
   }
 

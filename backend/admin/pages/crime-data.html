@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Crime Data — SafeTravel Admin</title>
+<link rel="stylesheet" href="../css/design-system.css"/>
+<style>
+.crime-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:18px; margin-bottom:12px; transition:all 0.2s; }
+.crime-card:hover { border-color:var(--border2); transform:translateY(-1px); }
+.progress-bar { background:var(--bg3); border-radius:4px; height:6px; overflow:hidden; margin-top:8px; }
+.progress-fill { height:100%; border-radius:4px; transition:width 0.8s ease; }
+.heat-zone { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
+.heat-zone:last-child { border-bottom:none; }
+.add-form { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">🛡️</div>
+      <div><div class="logo-text">SafeTravel</div><div class="logo-sub">Admin Portal</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a class="nav-item" href="live-tracking.html"><span class="nav-icon">📍</span> Live Tracking</a>
+      <a class="nav-item" href="sos-alerts.html"><span class="nav-icon">🆘</span> SOS Alerts</a>
+      <div class="nav-section-label">Management</div>
+      <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+      <a class="nav-item" href="alert-management.html"><span class="nav-icon">📢</span> Broadcast Alerts</a>
+      <a class="nav-item active" href="crime-data.html"><span class="nav-icon">⚠️</span> Crime Data</a>
+      <div class="nav-section-label">Intelligence</div>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+      <a class="nav-item" href="zones.html"><span class="nav-icon">🗺️</span> Safety Zones</a>
+      <div class="nav-section-label">System</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+      <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff">A</div>
+        <div><div class="user-name">Admin User</div><div class="user-role">Super Administrator</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Crime Data</div>
+        <span class="topbar-subtitle">Area-wise crime statistics and reporting</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadData()">↻ Refresh</button>
+        <button class="btn btn-danger btn-sm" onclick="document.getElementById('addForm').scrollIntoView({behavior:'smooth'})">+ Add Report</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- Stats -->
+      <div class="stats-grid mb-6" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card red"><div class="stat-icon red">🚨</div><div class="stat-value text-red" id="totalCrimes">—</div><div class="stat-label">Total Reports</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">⚠️</div><div class="stat-value" style="color:var(--amber)" id="highCrimes">—</div><div class="stat-label">High Severity</div></div>
+        <div class="stat-card blue"><div class="stat-icon blue">📍</div><div class="stat-value" style="color:var(--accent)" id="hotspots">—</div><div class="stat-label">Hotspot Zones</div></div>
+        <div class="stat-card green"><div class="stat-icon green">📈</div><div class="stat-value text-green" id="thisWeek">—</div><div class="stat-label">This Week</div></div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Crime data table -->
+        <div>
+          <div class="card mb-4">
+            <div class="card-header">
+              <div class="card-title">Crime Reports by Area</div>
+              <div class="search-bar" style="width:180px">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search area..." oninput="filterCrime(this.value)"/>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Area</th><th>Crime Type</th><th>Reports</th><th>Severity</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="crimeBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Hotspots heatmap card -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Hotspot Rankings</div>
+              <span class="badge red" id="hotspotCount">—</span>
+            </div>
+            <div id="hotspotsList"></div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div>
+          <!-- Chart by type -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <div class="card-title">Crimes by Type</div>
+              <span class="badge amber">This Month</span>
+            </div>
+            <div id="crimeByType" style="display:flex;flex-direction:column;gap:10px"></div>
+          </div>
+
+          <!-- Add form -->
+          <div class="add-form" id="addForm">
+            <div style="font-size:15px;font-weight:700;margin-bottom:16px">+ Report New Crime Data</div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div class="input-group"><label class="input-label">Area / Location</label><input class="input" id="cArea" placeholder="e.g. Koramangala 4th Block"/></div>
+              <div class="input-group"><label class="input-label">Crime Type</label>
+                <select class="input" id="cType">
+                  <option>Pickpocketing</option><option>Bag Snatching</option><option>Tourist Scam</option>
+                  <option>Robbery</option><option>Harassment</option><option>Vehicle Theft</option><option>Other</option>
+                </select>
+              </div>
+              <div class="grid-2">
+                <div class="input-group"><label class="input-label">Reports Count</label><input class="input" id="cReports" type="number" min="1" placeholder="e.g. 5"/></div>
+                <div class="input-group"><label class="input-label">Severity</label>
+                  <select class="input" id="cSeverity"><option value="high">HIGH</option><option value="medium" selected>MEDIUM</option><option value="low">LOW</option></select></div>
+              </div>
+              <button class="btn btn-danger" style="width:100%" onclick="addCrimeData()">Submit Report</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script>
+const API = 'http://localhost:3000/api';
+let crimeData = [];
+
+const mockData = [
+  { area:'Koramangala Market', type:'Pickpocketing', reports:24, severity:'high' },
+  { area:'MG Road Junction', type:'Tourist Scam', reports:18, severity:'medium' },
+  { area:'Majestic Bus Stand', type:'Bag Snatching', reports:15, severity:'high' },
+  { area:'KIA Airport Area', type:'Taxi Fraud', reports:12, severity:'medium' },
+  { area:'Brigade Road', type:'Harassment', reports:9, severity:'medium' },
+  { area:'Whitefield Tech Park', type:'Vehicle Theft', reports:7, severity:'low' },
+  { area:'Silk Board Junction', type:'Robbery', reports:5, severity:'high' },
+  { area:'Indiranagar 100ft Rd', type:'Pickpocketing', reports:4, severity:'low' },
+];
+
+const typeStats = [
+  { type:'Pickpocketing', count:45, color:'var(--red)' },
+  { type:'Tourist Scam', count:32, color:'var(--amber)' },
+  { type:'Bag Snatching', count:28, color:'var(--accent)' },
+  { type:'Harassment', count:20, color:'var(--purple)' },
+  { type:'Vehicle Theft', count:15, color:'var(--green)' },
+  { type:'Robbery', count:12, color:'#06b6d4' },
+];
+
+const sevBadge = s => ({ high:`<span class="badge red">HIGH</span>`, medium:`<span class="badge amber">MEDIUM</span>`, low:`<span class="badge blue">LOW</span>` }[s] || `<span class="badge gray">${s}</span>`);
+
+async function loadData() {
+  try {
+    const res = await fetch(`${API}/admin/crime-data`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    crimeData = data.crimeData && data.crimeData.length ? data.crimeData : mockData;
+  } catch { crimeData = mockData; }
+  renderAll();
+}
+
+function renderAll() {
+  const total = crimeData.reduce((s,c)=>s+c.reports,0);
+  document.getElementById('totalCrimes').textContent = total;
+  document.getElementById('highCrimes').textContent = crimeData.filter(c=>c.severity==='high').reduce((s,c)=>s+c.reports,0);
+  document.getElementById('hotspots').textContent = crimeData.filter(c=>c.severity==='high').length;
+  document.getElementById('thisWeek').textContent = Math.round(total/4);
+  document.getElementById('hotspotCount').textContent = `${crimeData.length} zones`;
+  renderTable(crimeData);
+  renderHotspots();
+  renderTypeChart();
+}
+
+function renderTable(data) {
+  const maxRep = Math.max(...data.map(c=>c.reports));
+  document.getElementById('crimeBody').innerHTML = data.map(c => `
+    <tr>
+      <td style="font-weight:600;color:var(--text)">${c.area}</td>
+      <td style="font-size:12px;color:var(--text2)">${c.type}</td>
+      <td>
+        <div style="font-weight:700;color:var(--text)">${c.reports}</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${(c.reports/maxRep*100).toFixed(0)}%;background:${c.severity==='high'?'var(--red)':c.severity==='medium'?'var(--amber)':'var(--accent)'}"></div></div>
+      </td>
+      <td>${sevBadge(c.severity)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="alertArea('${c.area}')">📢 Alert</button></td>
+    </tr>`).join('');
+}
+
+function renderHotspots() {
+  const sorted = [...crimeData].sort((a,b)=>b.reports-a.reports);
+  const max = sorted[0]?.reports || 1;
+  document.getElementById('hotspotsList').innerHTML = sorted.map((c,i) => `
+    <div class="heat-zone">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:24px;height:24px;border-radius:50%;background:${i<3?'var(--red-glow)':'var(--bg3)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${i<3?'var(--red)':'var(--text3)'}">${i+1}</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${c.area}</div>
+          <div style="font-size:11px;color:var(--text3)">${c.type}</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700;color:${c.severity==='high'?'var(--red)':'var(--text)'}">${c.reports}</div>
+        <div class="progress-bar" style="width:80px;margin-top:4px"><div class="progress-fill" style="width:${(c.reports/max*100).toFixed(0)}%;background:${c.severity==='high'?'var(--red)':c.severity==='medium'?'var(--amber)':'var(--accent)'}"></div></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderTypeChart() {
+  const max = Math.max(...typeStats.map(t=>t.count));
+  document.getElementById('crimeByType').innerHTML = typeStats.map(t => `
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:13px;color:var(--text2)">${t.type}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--text)">${t.count}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${(t.count/max*100).toFixed(0)}%;background:${t.color}"></div></div>
+    </div>`).join('');
+}
+
+function filterCrime(q) {
+  const filtered = crimeData.filter(c => c.area.toLowerCase().includes(q.toLowerCase()) || c.type.toLowerCase().includes(q.toLowerCase()));
+  renderTable(filtered);
+}
+
+async function addCrimeData() {
+  const area = document.getElementById('cArea').value.trim();
+  const type = document.getElementById('cType').value;
+  const reports = parseInt(document.getElementById('cReports').value);
+  const severity = document.getElementById('cSeverity').value;
+  if (!area || !reports) { showToast('Please fill all fields','error'); return; }
+  try {
+    await fetch(`${API}/admin/crime-data`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ area, type, reports, severity })
+    });
+  } catch {}
+  crimeData.unshift({ area, type, reports, severity });
+  renderAll();
+  document.getElementById('cArea').value=''; document.getElementById('cReports').value='';
+  showToast(`Crime data added for ${area}`, 'success');
+}
+
+function alertArea(area) {
+  showToast(`Safety alert sent for: ${area}`, 'success');
+}
+
+function showToast(msg, type='success') {
+  const c={success:'var(--green)',error:'var(--red)',info:'var(--accent)'};
+  const i={success:'✓',error:'✕',info:'ℹ'};
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<span style="color:${c[type]}">${i[type]}</span> <span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+loadData();
+</script>
+</body>
+</html>

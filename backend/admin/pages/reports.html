@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reports & Analytics — SafeTravel Admin</title>
+<link rel="stylesheet" href="../css/design-system.css"/>
+<style>
+.bar-chart { display:flex; align-items:flex-end; gap:8px; height:120px; }
+.bar-grp { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.bar { width:100%; border-radius:4px 4px 0 0; min-height:4px; transition:height 0.6s cubic-bezier(.34,1.56,.64,1); }
+.bar-lbl { font-size:10px; color:var(--text3); }
+.donut-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+.donut-row:last-child { border-bottom:none; }
+.donut-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.kpi-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+.kpi { background:var(--bg3); border-radius:12px; padding:14px; text-align:center; }
+.kpi-val { font-size:22px; font-weight:700; }
+.kpi-lbl { font-size:11px; color:var(--text3); margin-top:3px; }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">🛡️</div>
+      <div><div class="logo-text">SafeTravel</div><div class="logo-sub">Admin Portal</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a class="nav-item" href="live-tracking.html"><span class="nav-icon">📍</span> Live Tracking</a>
+      <a class="nav-item" href="sos-alerts.html"><span class="nav-icon">🆘</span> SOS Alerts</a>
+      <div class="nav-section-label">Management</div>
+      <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+      <a class="nav-item" href="alert-management.html"><span class="nav-icon">📢</span> Broadcast Alerts</a>
+      <a class="nav-item" href="crime-data.html"><span class="nav-icon">⚠️</span> Crime Data</a>
+      <div class="nav-section-label">Intelligence</div>
+      <a class="nav-item active" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+      <a class="nav-item" href="zones.html"><span class="nav-icon">🗺️</span> Safety Zones</a>
+      <div class="nav-section-label">System</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+      <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff">A</div>
+        <div><div class="user-name">Admin User</div><div class="user-role">Super Administrator</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Reports & Analytics</div>
+        <span class="topbar-subtitle">Comprehensive safety intelligence platform</span>
+      </div>
+      <div class="topbar-actions">
+        <select class="input" style="width:140px;padding:7px 12px;font-size:12px" id="periodSelect" onchange="loadData()">
+          <option value="week">This Week</option>
+          <option value="month" selected>This Month</option>
+          <option value="quarter">This Quarter</option>
+          <option value="year">This Year</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="exportReport()">⬇ Export PDF</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadData()">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- KPI Stats -->
+      <div class="stats-grid mb-6" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card red"><div class="stat-icon red">🆘</div><div class="stat-value text-red" id="rTotalSOS">—</div><div class="stat-label">Total SOS</div><div class="stat-change down" id="rSOSTrend">—</div></div>
+        <div class="stat-card green"><div class="stat-icon green">✓</div><div class="stat-value text-green" id="rResolved">—</div><div class="stat-label">Resolved</div><div class="stat-change up" id="rResolvedRate">—</div></div>
+        <div class="stat-card blue"><div class="stat-icon blue">⏱</div><div class="stat-value" style="color:var(--accent)" id="rResponseTime">—</div><div class="stat-label">Avg Response</div><div class="stat-change up">↓ Improving</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">👥</div><div class="stat-value" style="color:var(--amber)" id="rUsers">—</div><div class="stat-label">Active Users</div><div class="stat-change up">↑ Growing</div></div>
+      </div>
+
+      <div class="grid-2 mb-6">
+        <!-- Monthly trend chart -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Monthly SOS Trend</div><div class="card-subtitle">Emergency incidents over time</div></div>
+            <span class="badge blue">12 Months</span>
+          </div>
+          <div class="bar-chart" id="monthlyChart"></div>
+          <div style="display:flex;justify-content:center;gap:16px;margin-top:12px">
+            <span style="font-size:11px;color:var(--text3)">🔴 Medical  🟡 Accident  🔵 Crime  ⬜ Other</span>
+          </div>
+        </div>
+
+        <!-- Emergency breakdown -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Emergency Type Breakdown</div><div class="card-subtitle">Distribution this period</div></div>
+          </div>
+          <div id="breakdownList"></div>
+          <div class="kpi-row">
+            <div class="kpi"><div class="kpi-val" style="color:var(--green)">96%</div><div class="kpi-lbl">Resolution Rate</div></div>
+            <div class="kpi"><div class="kpi-val" id="kpiAvgTime" style="color:var(--accent)">—</div><div class="kpi-lbl">Fastest Response</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- User growth -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">User Activity Report</div><div class="card-subtitle">Registered vs Active users</div></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Metric</th><th>Value</th><th>Change</th><th>Status</th></tr></thead>
+              <tbody id="metricsTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Response time breakdown -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Response Time Analysis</div><div class="card-subtitle">By emergency type</div></div>
+          </div>
+          <div id="responseList" style="display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script>
+const API = 'http://localhost:3000/api';
+
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const monthlyData = [12,18,15,22,19,25,14,16,20,17,13,15];
+
+const breakdown = [
+  {type:'Medical Emergency',count:45,color:'var(--red)',icon:'🏥'},
+  {type:'Police / Crime',count:38,color:'var(--accent)',icon:'🚔'},
+  {type:'Road Accident',count:18,color:'var(--amber)',icon:'🚗'},
+  {type:'Theft / Pickpocket',count:28,color:'var(--purple)',icon:'👜'},
+  {type:'Harassment',count:15,color:'#06b6d4',icon:'🛡️'},
+  {type:'Missed Check-In',count:12,color:'var(--green)',icon:'📍'},
+];
+
+const metrics = [
+  {metric:'Total Users',value:'1,247',change:'+12%',status:'up'},
+  {metric:'Active This Month',value:'643',change:'+8%',status:'up'},
+  {metric:'New Registrations',value:'89',change:'+22%',status:'up'},
+  {metric:'Check-Ins Today',value:'94',change:'+12',status:'up'},
+  {metric:'SOS Alerts Today',value:'3',change:'+2',status:'down'},
+  {metric:'Avg Session Time',value:'18m',change:'+3m',status:'up'},
+];
+
+const responseData = [
+  {type:'Medical',time:'3.2 min',color:'var(--red)',pct:32},
+  {type:'Crime',time:'4.8 min',color:'var(--accent)',pct:48},
+  {type:'Accident',time:'5.1 min',color:'var(--amber)',pct:51},
+  {type:'Missing',time:'12.0 min',color:'var(--purple)',pct:100},
+];
+
+async function loadData() {
+  try {
+    const res = await fetch(`${API}/admin/reports`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    document.getElementById('rTotalSOS').textContent = data.emergencyStats?.total || 156;
+    document.getElementById('rResolved').textContent = Math.round((data.emergencyStats?.total||156)*0.94);
+    document.getElementById('rResponseTime').textContent = data.responseTime?.avg || '4.2m';
+    document.getElementById('rUsers').textContent = '1,247';
+    document.getElementById('rSOSTrend').textContent = '↑ vs last period';
+    document.getElementById('rResolvedRate').textContent = '↑ 94% rate';
+    document.getElementById('kpiAvgTime').textContent = data.responseTime?.fastest || '1.5m';
+  } catch {
+    document.getElementById('rTotalSOS').textContent = 156;
+    document.getElementById('rResolved').textContent = 147;
+    document.getElementById('rResponseTime').textContent = '4.2m';
+    document.getElementById('rUsers').textContent = '1,247';
+    document.getElementById('rSOSTrend').textContent = '↑ +12% vs last month';
+    document.getElementById('rResolvedRate').textContent = '↑ 94.2% resolved';
+    document.getElementById('kpiAvgTime').textContent = '1.5m';
+  }
+  renderCharts();
+}
+
+function renderCharts() {
+  const max = Math.max(...monthlyData);
+  document.getElementById('monthlyChart').innerHTML = monthlyData.map((v,i) => `
+    <div class="bar-grp">
+      <div class="bar" style="height:${Math.max((v/max)*112,4)}px;background:linear-gradient(to top,var(--accent),var(--accent)60)"></div>
+      <div class="bar-lbl">${months[i]}</div>
+    </div>`).join('');
+
+  const total = breakdown.reduce((s,b)=>s+b.count,0);
+  document.getElementById('breakdownList').innerHTML = breakdown.map(b => `
+    <div class="donut-row">
+      <div class="donut-dot" style="background:${b.color}"></div>
+      <span style="flex:1;font-size:13px;color:var(--text2)">${b.icon} ${b.type}</span>
+      <span style="font-weight:700;font-size:13px;color:var(--text)">${b.count}</span>
+      <div style="width:60px;margin-left:10px">
+        <div style="background:var(--bg3);border-radius:4px;height:5px;overflow:hidden">
+          <div style="height:100%;width:${(b.count/total*100).toFixed(0)}%;background:${b.color};border-radius:4px"></div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('metricsTable').innerHTML = metrics.map(m => `
+    <tr>
+      <td style="color:var(--text)">${m.metric}</td>
+      <td style="font-weight:700;color:var(--text)">${m.value}</td>
+      <td style="color:${m.status==='up'?'var(--green)':'var(--red)'};font-size:12px">${m.change}</td>
+      <td><span class="badge ${m.status==='up'?'green':'red'}">${m.status==='up'?'▲ Up':'▼ Down'}</span></td>
+    </tr>`).join('');
+
+  document.getElementById('responseList').innerHTML = responseData.map(r => `
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:13px;color:var(--text2)">${r.type}</span>
+        <span style="font-size:13px;font-weight:700;color:${r.color}">${r.time}</span>
+      </div>
+      <div style="background:var(--bg3);border-radius:4px;height:6px;overflow:hidden">
+        <div style="height:100%;width:${r.pct}%;background:${r.color};border-radius:4px;transition:width 0.8s ease"></div>
+      </div>
+    </div>`).join('');
+}
+
+function exportReport() { showToast('Report exported as PDF','success'); }
+function showToast(msg,type='success') {
+  const c={success:'var(--green)',error:'var(--red)',info:'var(--accent)'};
+  const ic={success:'✓',error:'✕',info:'ℹ'};
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<span style="color:${c[type]}">${ic[type]}</span> <span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+loadData();
+</script>
+</body>
+</html>

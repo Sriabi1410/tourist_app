@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Broadcast Alerts — SafeTravel Admin</title>
+<link rel="stylesheet" href="../css/design-system.css"/>
+<style>
+.alert-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:18px; margin-bottom:12px; transition:all 0.2s; position:relative; overflow:hidden; }
+.alert-card:hover { border-color:var(--border2); }
+.alert-card.high::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; background:var(--red); }
+.alert-card.medium::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; background:var(--amber); }
+.alert-card.low::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; background:var(--accent); }
+.alert-card.info::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; background:var(--green); }
+.alert-head { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px; }
+.alert-body { font-size:13px; color:var(--text2); margin-bottom:10px; line-height:1.6; }
+.alert-footer { display:flex; align-items:center; justify-content:space-between; }
+.type-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.type-tab { padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:var(--surface); color:var(--text2); font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s; }
+.type-tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.compose-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px; }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">🛡️</div>
+      <div><div class="logo-text">SafeTravel</div><div class="logo-sub">Admin Portal</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a class="nav-item" href="live-tracking.html"><span class="nav-icon">📍</span> Live Tracking</a>
+      <a class="nav-item" href="sos-alerts.html"><span class="nav-icon">🆘</span> SOS Alerts</a>
+      <div class="nav-section-label">Management</div>
+      <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+      <a class="nav-item active" href="alert-management.html"><span class="nav-icon">📢</span> Broadcast Alerts</a>
+      <a class="nav-item" href="crime-data.html"><span class="nav-icon">⚠️</span> Crime Data</a>
+      <div class="nav-section-label">Intelligence</div>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+      <a class="nav-item" href="zones.html"><span class="nav-icon">🗺️</span> Safety Zones</a>
+      <div class="nav-section-label">System</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+      <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff">A</div>
+        <div><div class="user-name">Admin User</div><div class="user-role">Super Administrator</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Broadcast Alerts</div>
+        <span class="topbar-subtitle">Send alerts to tourists in your area</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadAlerts()">↻ Refresh</button>
+        <button class="btn btn-danger btn-sm" onclick="document.getElementById('composeSection').scrollIntoView({behavior:'smooth'})">+ New Alert</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- Stats -->
+      <div class="stats-grid mb-6" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card red"><div class="stat-icon red">🔴</div><div class="stat-value text-red" id="highCount">—</div><div class="stat-label">High Severity</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">🟡</div><div class="stat-value" style="color:var(--amber)" id="medCount">—</div><div class="stat-label">Medium Severity</div></div>
+        <div class="stat-card blue"><div class="stat-icon blue">📢</div><div class="stat-value" style="color:var(--accent)" id="totalCount">—</div><div class="stat-label">Total Alerts</div></div>
+        <div class="stat-card green"><div class="stat-icon green">👥</div><div class="stat-value text-green">2,847</div><div class="stat-label">Users Reachable</div></div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Alert list -->
+        <div>
+          <div class="card-header" style="margin-bottom:12px">
+            <div class="card-title">Active Alerts</div>
+            <div class="type-tabs">
+              <div class="type-tab active" onclick="setTypeFilter('all',this)">All</div>
+              <div class="type-tab" onclick="setTypeFilter('crime',this)">Crime</div>
+              <div class="type-tab" onclick="setTypeFilter('weather',this)">Weather</div>
+              <div class="type-tab" onclick="setTypeFilter('traffic',this)">Traffic</div>
+            </div>
+          </div>
+          <div id="alertsList"></div>
+        </div>
+
+        <!-- Compose -->
+        <div id="composeSection">
+          <div class="compose-card">
+            <div style="font-size:15px;font-weight:700;margin-bottom:18px">📢 Compose New Alert</div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div class="input-group">
+                <label class="input-label">Alert Type</label>
+                <select class="input" id="aType">
+                  <option value="crime">⚠️ Crime Warning</option>
+                  <option value="weather">🌧️ Weather Alert</option>
+                  <option value="traffic">🚦 Traffic / Road Closure</option>
+                  <option value="advisory">📋 Travel Advisory</option>
+                  <option value="general">📢 General Safety</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Alert Title</label>
+                <input class="input" id="aTitle" placeholder="e.g. Pickpocket Alert — Central Market"/>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Message</label>
+                <textarea class="input" id="aMessage" rows="4" placeholder="Describe the safety situation in detail..."></textarea>
+              </div>
+              <div class="grid-2">
+                <div class="input-group">
+                  <label class="input-label">Severity</label>
+                  <select class="input" id="aSeverity">
+                    <option value="high">🔴 HIGH — Immediate Danger</option>
+                    <option value="medium">🟡 MEDIUM — Exercise Caution</option>
+                    <option value="low">🔵 LOW — Informational</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label class="input-label">Target Area</label>
+                  <input class="input" id="aArea" placeholder="All users / zone name"/>
+                </div>
+              </div>
+              <button class="btn btn-danger" style="width:100%;padding:12px" onclick="sendAlert()">📢 Broadcast to All Users</button>
+            </div>
+          </div>
+
+          <!-- Recent stats -->
+          <div class="card" style="margin-top:16px">
+            <div class="card-title" style="margin-bottom:14px">📊 Alert Statistics</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center">
+                <div style="font-size:22px;font-weight:700;color:var(--red)">156</div>
+                <div style="font-size:11px;color:var(--text3)">Total This Month</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center">
+                <div style="font-size:22px;font-weight:700;color:var(--green)">94%</div>
+                <div style="font-size:11px;color:var(--text3)">Read Rate</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center">
+                <div style="font-size:22px;font-weight:700;color:var(--accent)">2.8s</div>
+                <div style="font-size:11px;color:var(--text3)">Avg Delivery</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center">
+                <div style="font-size:22px;font-weight:700;color:var(--amber)">2,847</div>
+                <div style="font-size:11px;color:var(--text3)">Users Notified</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script>
+const API = 'http://localhost:3000/api';
+let allAlerts = [], currentTypeFilter = 'all';
+
+const mockAlerts = [
+  { id:'1', title:'Pickpocket Warning', area:'Koramangala Market', type:'crime', severity:'high', timestamp: new Date(Date.now()-2*60000).toISOString() },
+  { id:'2', title:'Heavy Rain & Flash Flood Warning', area:'South Bengaluru', type:'weather', severity:'medium', timestamp: new Date(Date.now()-15*60000).toISOString() },
+  { id:'3', title:'Road Closure — Brigade Road', area:'Central BLR', type:'traffic', severity:'low', timestamp: new Date(Date.now()-45*60000).toISOString() },
+  { id:'4', title:'Tourist Scam Alert — Airport Taxis', area:'KIA Airport', type:'crime', severity:'medium', timestamp: new Date(Date.now()-90*60000).toISOString() },
+  { id:'5', title:'Travel Advisory Updated', area:'Delhi NCR', type:'advisory', severity:'low', timestamp: new Date(Date.now()-2*3600000).toISOString() },
+];
+
+const sevIcon = { high:'🔴', medium:'🟡', low:'🔵', info:'🟢' };
+const typeIcon = { crime:'🚨', weather:'🌧️', traffic:'🚦', advisory:'📋', general:'📢', default:'⚠️' };
+
+async function loadAlerts() {
+  try {
+    const res = await fetch(`${API}/alerts`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    allAlerts = data.alerts && data.alerts.length ? data.alerts : mockAlerts;
+  } catch { allAlerts = mockAlerts; }
+  renderAlerts(allAlerts);
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('highCount').textContent = allAlerts.filter(a=>a.severity==='high').length;
+  document.getElementById('medCount').textContent = allAlerts.filter(a=>a.severity==='medium').length;
+  document.getElementById('totalCount').textContent = allAlerts.length;
+}
+
+function renderAlerts(data) {
+  document.getElementById('alertsList').innerHTML = data.map(a => {
+    const ts = new Date(a.timestamp);
+    const ago = Math.round((Date.now()-ts)/60000);
+    const timeStr = ago < 60 ? `${ago}m ago` : `${Math.round(ago/60)}h ago`;
+    return `<div class="alert-card ${a.severity}">
+      <div class="alert-head">
+        <div>
+          <div style="font-weight:700;font-size:14px;color:var(--text)">${sevIcon[a.severity]||'⚠️'} ${a.title}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">${(typeIcon[a.type]||'📢')} ${a.type?.toUpperCase()} · 📍 ${a.area}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="badge ${a.severity==='high'?'red':a.severity==='medium'?'amber':'blue'}">${a.severity?.toUpperCase()}</span>
+          <span style="font-size:11px;color:var(--text3)">${timeStr}</span>
+        </div>
+      </div>
+      <div class="alert-footer">
+        <span style="font-size:11px;color:var(--text3)">ID: ${a.id}</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="deleteAlert('${a.id}',this)">🗑 Delete</button>
+          <button class="btn btn-ghost btn-sm" onclick="rebroadcast('${a.title}')">📢 Re-send</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setTypeFilter(type, el) {
+  currentTypeFilter = type;
+  document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const filtered = type === 'all' ? allAlerts : allAlerts.filter(a => a.type === type);
+  renderAlerts(filtered);
+}
+
+async function sendAlert() {
+  const title = document.getElementById('aTitle').value.trim();
+  const area = document.getElementById('aArea').value.trim() || 'All Users';
+  const type = document.getElementById('aType').value;
+  const severity = document.getElementById('aSeverity').value;
+  const message = document.getElementById('aMessage').value.trim();
+  if (!title) { showToast('Please enter an alert title','error'); return; }
+  try {
+    const res = await fetch(`${API}/alerts`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ title, area, type, severity, message })
+    });
+    const data = await res.json();
+    allAlerts.unshift(data.alert || { id: Date.now().toString(), title, area, type, severity, timestamp: new Date().toISOString() });
+  } catch {
+    allAlerts.unshift({ id: Date.now().toString(), title, area, type, severity, timestamp: new Date().toISOString() });
+  }
+  renderAlerts(allAlerts); updateStats();
+  document.getElementById('aTitle').value = '';
+  document.getElementById('aMessage').value = '';
+  document.getElementById('aArea').value = '';
+  showToast(`Alert broadcast to 2,847 users: "${title}"`, 'success');
+}
+
+function deleteAlert(id, el) {
+  allAlerts = allAlerts.filter(a => a.id !== id);
+  renderAlerts(allAlerts); updateStats();
+  showToast('Alert removed', 'info');
+}
+function rebroadcast(title) { showToast(`Re-broadcast sent: "${title}"`, 'success'); }
+
+function showToast(msg, type='success') {
+  const icons={success:'✓',error:'✕',info:'ℹ'};
+  const colors={success:'var(--green)',error:'var(--red)',info:'var(--accent)'};
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<span style="color:${colors[type]}">${icons[type]}</span> <span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+loadAlerts();
+</script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SOS Feed — Police Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#06080f;--bg2:#090d18;--bg3:#0d1220;--surface:#101828;--surface2:#162035;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8edf5;--text2:#7a92b0;--text3:#3d5070;
+  --police:#1e3a6b;--police-light:#2563b0;--police-glow:rgba(37,99,176,0.2);
+  --gold:#d4a017;--red:#dc2626;--green:#059669;--amber:#d97706;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--sidebar-w:260px;--radius:12px;--radius-lg:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.sidebar-logo{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.logo-badge{width:44px;height:44px;background:linear-gradient(145deg,var(--police),var(--police-light));border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.logo-text{font-weight:800;font-size:15px;}.logo-sub{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:.8px;text-transform:uppercase;}
+.sidebar-nav{flex:1;padding:10px 0;overflow-y:auto;}
+.nav-section{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:14px 18px 5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;color:var(--text2);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.nav-item:hover{background:var(--surface);color:var(--text);}
+.nav-item.active{background:var(--surface);color:var(--text);border-left-color:var(--gold);}
+.nav-icon{font-size:15px;width:20px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;}
+.sidebar-officer{padding:14px 18px;border-top:1px solid var(--border);}
+.officer-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.officer-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--police),var(--police-light));border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.officer-nm{font-size:13px;font-weight:600;}.officer-rank{font-size:10px;color:var(--gold);}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+.topbar{height:62px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:50;}
+.topbar-title{font-size:17px;font-weight:800;flex:1;}
+.topbar-sub{font-size:11px;color:var(--text3);}
+.content{padding:24px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-police{background:linear-gradient(135deg,var(--police),var(--police-light));color:#fff;}
+.btn-red{background:rgba(220,38,38,.15);color:#fca5a5;border:1px solid rgba(220,38,38,.25);}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
+.btn-green{background:rgba(5,150,105,.15);color:#6ee7b7;border:1px solid rgba(5,150,105,.25);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.badge-red{background:rgba(220,38,38,.12);color:#fca5a5;}.badge-red::before{background:var(--red);}
+.badge-amber{background:rgba(217,119,6,.12);color:#fcd34d;}.badge-amber::before{background:var(--amber);}
+.badge-green{background:rgba(5,150,105,.12);color:#6ee7b7;}.badge-green::before{background:var(--green);}
+.badge-blue{background:rgba(37,99,176,.15);color:#93c5fd;}.badge-blue::before{background:var(--police-light);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:16px;}
+.live-dot{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--red);}
+.live-dot::before{content:'';width:7px;height:7px;background:var(--red);border-radius:50%;animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+.sos-card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.sos-card.urgent{background:linear-gradient(135deg,rgba(220,38,38,.08),var(--surface));border:1px solid rgba(220,38,38,.35);}
+.sos-card.urgent::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--red);}
+.sos-card.medium{border:1px solid rgba(217,119,6,.3);}
+.sos-card.medium::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--amber);}
+.sc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.sc-user{display:flex;align-items:center;gap:12px;}
+.sc-av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}
+.sc-body{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.sc-field{background:var(--bg3);border-radius:10px;padding:10px 14px;}
+.sc-fl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.sc-fv{font-size:13px;font-weight:600;color:var(--text);margin-top:3px;}
+.sc-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.resp-log{background:var(--bg3);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.8;}
+.toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:13px;animation:tIn .3s ease;min-width:220px;}
+@keyframes tIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">🚔</div>
+    <div><div class="logo-text">Police Portal</div><div class="logo-sub">SafeTravel LEO</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Dispatch</div>
+    <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Command Center</a>
+    <a class="nav-item active" href="sos-feed.html"><span class="nav-icon">🆘</span> SOS Feed<span class="nav-badge">3</span></a>
+    <a class="nav-item" href="map.html"><span class="nav-icon">📍</span> Live Map</a>
+    <a class="nav-item" href="dispatch.html"><span class="nav-icon">🚔</span> Dispatch Units</a>
+    <div class="nav-section">Incidents</div>
+    <a class="nav-item" href="incidents.html"><span class="nav-icon">📋</span> Incident Log</a>
+    <a class="nav-item" href="crime-reports.html"><span class="nav-icon">⚠️</span> Crime Reports</a>
+    <a class="nav-item" href="tourists.html"><span class="nav-icon">👥</span> Tourists</a>
+    <div class="nav-section">Station</div>
+    <a class="nav-item" href="officers.html"><span class="nav-icon">👮</span> Officers</a>
+    <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+  </nav>
+  <div class="sidebar-officer">
+    <div class="officer-card">
+      <div class="officer-av">👮</div>
+      <div><div class="officer-nm">Insp. Rajesh Kumar</div><div class="officer-rank">Badge #4721 · South Div.</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">SOS Emergency Feed</div>
+      <div class="topbar-sub">Live emergency alerts — South Division jurisdiction</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="live-dot">LIVE</div>
+      <span class="badge badge-red">3 Active</span>
+      <button class="btn btn-ghost btn-sm" onclick="toast('Feed refreshed','info')">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Filter row -->
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+      <button class="btn btn-police btn-sm">All (26)</button>
+      <button class="btn btn-ghost btn-sm">Active (3)</button>
+      <button class="btn btn-ghost btn-sm">Medical (8)</button>
+      <button class="btn btn-ghost btn-sm">Accident (5)</button>
+      <button class="btn btn-ghost btn-sm">Crime (6)</button>
+      <button class="btn btn-ghost btn-sm">Resolved (18)</button>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm">Export</button>
+        <button class="btn btn-ghost btn-sm">Filter ▾</button>
+      </div>
+    </div>
+
+    <!-- SOS Cards -->
+    <div id="sosFeed"></div>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+const sos = [
+  { id:'SOS-2847', name:'Rahul Sharma', nation:'🇮🇳', phone:'+91 98765 43210', type:'Medical Emergency',
+    urgency:'urgent', time:'2 min ago', lat:'12.9716', lng:'77.5946',
+    loc:'Koramangala, Bengaluru', unit:'Unit 07', eta:'3 min',
+    log:'[14:32:10] SOS triggered via SafeTravel app\n[14:32:11] GPS locked ±5m accuracy\n[14:32:12] Emergency contacts notified via SMS\n[14:32:13] Police alerted — Unit 07 dispatched',
+    av:'RS', avc:'#dc2626' },
+  { id:'SOS-2846', name:'Priya Mehta', nation:'🇮🇳', phone:'+91 91234 56789', type:'Road Accident',
+    urgency:'urgent', time:'8 min ago', lat:'12.9741', lng:'77.6101',
+    loc:'MG Road Junction', unit:'Unit 14', eta:'6 min',
+    log:'[14:26:05] SOS triggered — emergency type: Accident\n[14:26:07] 2 tourists involved\n[14:26:09] Ambulance notified\n[14:26:11] Unit 14 en route',
+    av:'PM', avc:'#d97706' },
+  { id:'SOS-2845', name:'John Doe', nation:'🇺🇸', phone:'+1 555 012 3456', type:'Missed Check-In',
+    urgency:'medium', time:'25 min ago', lat:'12.9600', lng:'77.6200',
+    loc:'Airport Area, Bengaluru', unit:'Pending', eta:'—',
+    log:'[14:09:00] Auto check-in missed\n[14:19:01] Grace period expired\n[14:19:02] Emergency contacts alerted\n[14:22:00] Police department notified',
+    av:'JD', avc:'#7c3aed' },
+];
+
+function renderFeed() {
+  document.getElementById('sosFeed').innerHTML = sos.map(s => `
+    <div class="sos-card ${s.urgency}">
+      <div class="sc-head">
+        <div class="sc-user">
+          <div class="sc-av" style="background:${s.avc}22;color:${s.avc}">${s.av}</div>
+          <div>
+            <div style="font-weight:700;font-size:15px">${s.nation} ${s.name}</div>
+            <div style="font-size:11px;color:var(--text3)">${s.phone} · ${s.id}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge ${s.urgency==='urgent'?'badge-red':'badge-amber'}">${s.type}</span>
+          <span style="font-size:11px;color:var(--text3)">${s.time}</span>
+        </div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-field">
+          <div class="sc-fl">GPS Coordinates</div>
+          <div class="sc-fv" style="font-family:var(--mono);font-size:12px">${s.lat}, ${s.lng}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${s.loc}</div>
+        </div>
+        <div class="sc-field">
+          <div class="sc-fl">Dispatched Unit</div>
+          <div class="sc-fv">🚔 ${s.unit}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">ETA: ${s.eta}</div>
+        </div>
+        <div class="sc-field">
+          <div class="sc-fl">Response Status</div>
+          <div class="sc-fv" style="color:${s.urgency==='urgent'?'var(--red)':'var(--amber)'}">${s.urgency==='urgent'?'Active Response':'Under Review'}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Monitoring</div>
+        </div>
+      </div>
+      <div class="sc-actions">
+        <button class="btn btn-red btn-sm" onclick="toast('Ambulance dispatched to ${s.name}','success')">🚑 Ambulance</button>
+        <button class="btn btn-police btn-sm" onclick="toast('Police unit assigned to ${s.id}','success')">🚔 Assign Unit</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.open('https://maps.google.com/?q=${s.lat},${s.lng}','_blank')">📍 Map</button>
+        <button class="btn btn-ghost btn-sm" onclick="toast('Calling ${s.name}...','info')">📞 Call</button>
+        <button class="btn btn-ghost btn-sm" onclick="toast('SMS sent to ${s.name}','success')">💬 SMS</button>
+        <button class="btn btn-green btn-sm" style="margin-left:auto" onclick="this.closest('.sos-card').remove();toast('${s.id} marked resolved','success')">✓ Resolve</button>
+      </div>
+      <div class="resp-log">${s.log}</div>
+    </div>
+  `).join('');
+}
+
+function toast(msg, type='info') {
+  const c={success:'var(--green)',error:'var(--red)',info:'var(--police-light)'};
+  const t=document.createElement('div');
+  t.className='toast';
+  t.innerHTML=`<span style="color:${c[type]||c.info}">${type==='success'?'✓':'ℹ'}</span> ${msg}`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+renderFeed();
+</script>
+</body>
+</html>

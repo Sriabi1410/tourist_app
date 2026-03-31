@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SOS Alerts — SafeTravel Admin</title>
+<link rel="stylesheet" href="../css/design-system.css"/>
+<style>
+.sos-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 14px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.sos-card.critical {
+  border-color: rgba(239,68,68,0.4);
+  background: linear-gradient(135deg, rgba(239,68,68,0.06), var(--surface));
+}
+.sos-card.critical::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--red);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+}
+.sos-card.medium { border-color: rgba(245,158,11,0.3); }
+.sos-card.medium::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--amber);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+}
+.sos-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.sos-user { display: flex; align-items: center; gap: 12px; }
+.sos-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.sos-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.sos-body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.sos-field { background: var(--bg3); border-radius: 10px; padding: 10px 14px; }
+.sos-field-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+.sos-field-value { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 4px; }
+.sos-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.response-log {
+  background: var(--bg3);
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.8;
+  font-family: 'DM Mono', monospace;
+}
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.filter-tab {
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  transition: all 0.15s;
+}
+.filter-tab.active { background: var(--red); border-color: var(--red); color: #fff; }
+.filter-tab:hover:not(.active) { border-color: var(--border2); color: var(--text); }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">🛡️</div>
+      <div><div class="logo-text">SafeTravel</div><div class="logo-sub">Admin Portal</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a class="nav-item" href="live-tracking.html"><span class="nav-icon">📍</span> Live Tracking</a>
+      <a class="nav-item active" href="sos-alerts.html"><span class="nav-icon">🆘</span> SOS Alerts<span class="nav-badge">3</span></a>
+      <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+      <a class="nav-item" href="alert-management.html"><span class="nav-icon">📢</span> Broadcast Alerts</a>
+      <a class="nav-item" href="crime-data.html"><span class="nav-icon">⚠️</span> Crime Data</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+      <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff">A</div>
+        <div><div class="user-name">Admin User</div><div class="user-role">Super Administrator</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">SOS Alerts</div>
+        <span class="topbar-subtitle">Emergency incident management</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="live-dot">LIVE</div>
+        <button class="btn btn-ghost btn-sm">Export</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- Stats -->
+      <div class="stats-grid mb-6" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card red"><div class="stat-icon red">🆘</div><div class="stat-value text-red">3</div><div class="stat-label">Active Now</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">⏳</div><div class="stat-value" style="color:var(--amber)">5</div><div class="stat-label">Under Review</div></div>
+        <div class="stat-card green"><div class="stat-icon green">✓</div><div class="stat-value text-green">18</div><div class="stat-label">Resolved Today</div></div>
+        <div class="stat-card blue"><div class="stat-icon blue">⏱</div><div class="stat-value" style="color:var(--accent)">4.2m</div><div class="stat-label">Avg Response</div></div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <button class="filter-tab active">All (26)</button>
+        <button class="filter-tab">Active (3)</button>
+        <button class="filter-tab">Medical (8)</button>
+        <button class="filter-tab">Accident (6)</button>
+        <button class="filter-tab">Crime (5)</button>
+        <button class="filter-tab">Resolved (18)</button>
+      </div>
+
+      <!-- SOS Cards -->
+      <div id="sosList"></div>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const sosData = [
+  {
+    id: 'SOS-2847', name: 'Rahul Sharma', country: '🇮🇳', phone: '+91 98765 43210',
+    type: 'Medical', severity: 'critical', time: '2 min ago',
+    lat: '12.9716', lng: '77.5946', location: 'Koramangala, Bengaluru',
+    smsStatus: 'Sent', onlineStatus: 'Active', contacts: 3,
+    log: '[14:32:10] SOS triggered via app\n[14:32:11] GPS coordinates acquired (±5m)\n[14:32:12] SMS sent to 3 emergency contacts\n[14:32:13] Alert dispatched to police & ambulance',
+    initials: 'RS', avatarColor: '#ef4444'
+  },
+  {
+    id: 'SOS-2846', name: 'Priya Mehta', country: '🇮🇳', phone: '+91 91234 56789',
+    type: 'Road Accident', severity: 'critical', time: '8 min ago',
+    lat: '12.9741', lng: '77.6101', location: 'MG Road Junction',
+    smsStatus: 'Sent', onlineStatus: 'Active', contacts: 2,
+    log: '[14:26:05] SOS triggered via app\n[14:26:06] Emergency type: Road Accident\n[14:26:07] Live location shared\n[14:26:09] Police Unit #14 dispatched',
+    initials: 'PM', avatarColor: '#f59e0b'
+  },
+  {
+    id: 'SOS-2845', name: 'John Doe', country: '🇺🇸', phone: '+1 555 012 3456',
+    type: 'Missed Check-In', severity: 'medium', time: '25 min ago',
+    lat: '12.9600', lng: '77.6200', location: 'Airport Area',
+    smsStatus: 'Sent', onlineStatus: 'Investigating', contacts: 1,
+    log: '[14:09:00] Auto check-in missed\n[14:19:00] Grace period expired\n[14:19:01] Emergency contacts notified via SMS\n[14:22:00] No response — admin alerted',
+    initials: 'JD', avatarColor: '#8b5cf6'
+  },
+];
+
+function renderSOS() {
+  document.getElementById('sosList').innerHTML = sosData.map(s => `
+    <div class="sos-card ${s.severity}">
+      <div class="sos-header">
+        <div class="sos-user">
+          <div class="sos-avatar" style="background:${s.avatarColor}22;color:${s.avatarColor}">${s.initials}</div>
+          <div>
+            <div style="font-weight:700;font-size:15px;color:var(--text)">${s.country} ${s.name}</div>
+            <div class="sos-meta">${s.phone} · ID: ${s.id}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge ${s.severity === 'critical' ? 'red' : 'amber'}">${s.type}</span>
+          <span style="font-size:12px;color:var(--text3)">${s.time}</span>
+        </div>
+      </div>
+      <div class="sos-body">
+        <div class="sos-field">
+          <div class="sos-field-label">GPS Location</div>
+          <div class="sos-field-value" style="font-family:'DM Mono',monospace;font-size:12px">${s.lat}, ${s.lng}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${s.location}</div>
+        </div>
+        <div class="sos-field">
+          <div class="sos-field-label">Alert Status</div>
+          <div class="sos-field-value">
+            <span style="color:var(--green)">✓</span> SMS ${s.smsStatus} &nbsp;
+            <span style="color:var(--accent)">●</span> ${s.onlineStatus}
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${s.contacts} contacts notified</div>
+        </div>
+        <div class="sos-field">
+          <div class="sos-field-label">Response</div>
+          <div class="sos-field-value" style="color:${s.severity === 'critical' ? 'var(--red)' : 'var(--amber)'}">
+            ${s.onlineStatus}
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Awaiting confirmation</div>
+        </div>
+      </div>
+      <div class="sos-actions">
+        <button class="btn btn-danger btn-sm" onclick="dispatch('${s.name}')">🚑 Dispatch Ambulance</button>
+        <button class="btn btn-primary btn-sm" onclick="dispatch('${s.name}','police')">🚔 Dispatch Police</button>
+        <button class="btn btn-ghost btn-sm" onclick="openMap('${s.lat}','${s.lng}')">📍 View on Map</button>
+        <button class="btn btn-ghost btn-sm" onclick="call('${s.phone}')">📞 Call User</button>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;color:var(--green)" onclick="resolve('${s.id}')">✓ Mark Resolved</button>
+      </div>
+      <div class="response-log">${s.log}</div>
+    </div>
+  `).join('');
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  const colors = { success: 'var(--green)', error: 'var(--red)', info: 'var(--accent)' };
+  t.innerHTML = `<span style="color:${colors[type] || colors.info}">●</span> <span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function dispatch(name, type = 'ambulance') {
+  showToast(`${type === 'police' ? '🚔 Police' : '🚑 Ambulance'} dispatched to ${name}`, 'success');
+}
+function openMap(lat, lng) {
+  window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
+}
+function call(phone) {
+  showToast(`Calling ${phone}...`, 'info');
+}
+function resolve(id) {
+  showToast(`SOS ${id} marked as resolved`, 'success');
+}
+
+document.querySelectorAll('.filter-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+
+renderSOS();
+</script>
+</body>
+</html>

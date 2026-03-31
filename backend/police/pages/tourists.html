@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tourists — Police Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#06080f;--bg2:#090d18;--bg3:#0d1220;--surface:#101828;--surface2:#162035;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8edf5;--text2:#7a92b0;--text3:#3d5070;--police:#1e3a6b;--police-light:#2563b0;--gold:#d4a017;--red:#dc2626;--green:#059669;--amber:#d97706;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--sidebar-w:260px;--radius:12px;--radius-lg:18px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.sidebar-logo{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.logo-badge{width:44px;height:44px;background:linear-gradient(145deg,var(--police),var(--police-light));border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.logo-text{font-weight:800;font-size:15px;}.logo-sub{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:.8px;text-transform:uppercase;}
+.sidebar-nav{flex:1;padding:10px 0;overflow-y:auto;}
+.nav-section{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:14px 18px 5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;color:var(--text2);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.nav-item:hover{background:var(--surface);color:var(--text);}.nav-item.active{background:var(--surface);color:var(--text);border-left-color:var(--gold);}
+.nav-icon{font-size:15px;width:20px;text-align:center;}.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;}
+.sidebar-officer{padding:14px 18px;border-top:1px solid var(--border);}
+.officer-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.officer-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--police),var(--police-light));border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.officer-nm{font-size:13px;font-weight:600;}.officer-rank{font-size:10px;color:var(--gold);}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+.topbar{height:62px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:50;}
+.topbar-left{flex:1;}.topbar-title{font-size:17px;font-weight:800;}.topbar-sub{font-size:11px;color:var(--text3);}
+.content{padding:24px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-police{background:linear-gradient(135deg,var(--police),var(--police-light));color:#fff;}
+.btn-red{background:rgba(220,38,38,.15);color:#fca5a5;border:1px solid rgba(220,38,38,.25);}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.badge-red{background:rgba(220,38,38,.12);color:#fca5a5;}.badge-red::before{background:var(--red);}
+.badge-amber{background:rgba(217,119,6,.12);color:#fcd34d;}.badge-amber::before{background:var(--amber);}
+.badge-green{background:rgba(5,150,105,.12);color:#6ee7b7;}.badge-green::before{background:var(--green);}
+.badge-blue{background:rgba(37,99,176,.15);color:#93c5fd;}.badge-blue::before{background:var(--police-light);}
+.badge-gray{background:rgba(255,255,255,.05);color:var(--text3);}.badge-gray::before{background:var(--text3);}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;}
+.stat-val{font-size:26px;font-weight:800;letter-spacing:-1px;margin-top:8px;}
+.stat-lbl{font-size:11px;color:var(--text3);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-title{font-size:14px;font-weight:700;}.card-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+table{width:100%;border-collapse:collapse;}
+thead th{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;border-bottom:1px solid var(--border);text-align:left;}
+tbody td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--bg3);}
+.fpill{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.fpill.active{background:var(--police-light);border-color:var(--police-light);color:#fff;}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;}
+.search-bar input{background:none;border:none;color:var(--text);font-size:13px;flex:1;outline:none;font-family:var(--font);}
+.search-bar input::placeholder{color:var(--text3);}
+.toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:13px;animation:tIn .3s ease;min-width:220px;}
+@keyframes tIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">🚔</div>
+    <div><div class="logo-text">Police Portal</div><div class="logo-sub">SafeTravel LEO</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Dispatch</div>
+    <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Command Center</a>
+    <a class="nav-item" href="sos-feed.html"><span class="nav-icon">🆘</span> SOS Feed<span class="nav-badge">3</span></a>
+    <a class="nav-item" href="map.html"><span class="nav-icon">📍</span> Live Map</a>
+    <a class="nav-item" href="dispatch.html"><span class="nav-icon">🚔</span> Dispatch Units</a>
+    <div class="nav-section">Incidents</div>
+    <a class="nav-item" href="incidents.html"><span class="nav-icon">📋</span> Incident Log</a>
+    <a class="nav-item" href="crime-reports.html"><span class="nav-icon">⚠️</span> Crime Reports</a>
+    <a class="nav-item active" href="tourists.html"><span class="nav-icon">👥</span> Tourists</a>
+    <a class="nav-item" href="missing.html"><span class="nav-icon">🔍</span> Missing Persons</a>
+    <div class="nav-section">Station</div>
+    <a class="nav-item" href="officers.html"><span class="nav-icon">👮</span> Officers</a>
+    <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+    <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+  </nav>
+  <div class="sidebar-officer">
+    <div class="officer-card">
+      <div class="officer-av">👮</div>
+      <div><div class="officer-nm">Insp. Rajesh Kumar</div><div class="officer-rank">Badge #4721 · South Div.</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Tourist Registry</div>
+      <div class="topbar-sub">All tourists in your jurisdiction · Live status</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="search-bar" style="width:220px">
+        <span style="color:var(--text3)">🔍</span>
+        <input type="text" placeholder="Search tourists..." oninput="filterTourists(this.value)"/>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="loadData()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="stats-row">
+      <div class="stat" style="border-top:2px solid var(--police-light)">
+        <div style="font-size:18px">👥</div><div class="stat-val" style="color:#93c5fd" id="tTotal">—</div><div class="stat-lbl">Total Tourists</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--green)">
+        <div style="font-size:18px">🟢</div><div class="stat-val" style="color:var(--green)" id="tOnline">—</div><div class="stat-lbl">Online Now</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--red)">
+        <div style="font-size:18px">🆘</div><div class="stat-val" style="color:var(--red)" id="tSOS">—</div><div class="stat-lbl">SOS Active</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--amber)">
+        <div style="font-size:18px">⚠️</div><div class="stat-val" style="color:var(--amber)" id="tMissed">—</div><div class="stat-lbl">Missed Check-In</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">All Tourists</div><div class="card-sub">Active tourists in South Division jurisdiction</div></div>
+        <div style="display:flex;gap:6px">
+          <div class="fpill active" onclick="setTFilter('all',this)">All</div>
+          <div class="fpill" onclick="setTFilter('SOS',this)">🆘 SOS</div>
+          <div class="fpill" onclick="setTFilter('Online',this)">🟢 Online</div>
+          <div class="fpill" onclick="setTFilter('Missed',this)">⚠️ Missed</div>
+          <div class="fpill" onclick="setTFilter('Offline',this)">⚫ Offline</div>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Tourist</th><th>Nationality</th><th>Phone</th><th>Status</th><th>Last Location</th><th>SOS History</th><th>Last Seen</th><th>Actions</th></tr></thead>
+          <tbody id="touristBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+<script>
+const API='http://localhost:3000/api';
+let tourists=[
+  {name:'Rahul Sharma',flag:'🇮🇳',phone:'+91 98765 43210',status:'SOS',location:'Koramangala',sos:1,lastSeen:'Now',init:'RS',color:'#dc2626'},
+  {name:'Priya Mehta',flag:'🇮🇳',phone:'+91 91234 56789',status:'Online',location:'MG Road',sos:0,lastSeen:'5m ago',init:'PM',color:'#2563b0'},
+  {name:'Yuki Tanaka',flag:'🇯🇵',phone:'+81 90 1234 5678',status:'Online',location:'Indiranagar',sos:2,lastSeen:'8m ago',init:'YT',color:'#8b5cf6'},
+  {name:'Li Wei',flag:'🇨🇳',phone:'+86 138 0000 1234',status:'Offline',location:'Last: Airport',sos:0,lastSeen:'1h ago',init:'LW',color:'#059669'},
+  {name:'Sara Kovacs',flag:'🇩🇪',phone:'+49 170 123 4567',status:'Checked In',location:'Whitefield',sos:0,lastSeen:'12m ago',init:'SK',color:'#0891b2'},
+  {name:'John Doe',flag:'🇺🇸',phone:'+1 555 012 3456',status:'Missed',location:'Last: Airport',sos:3,lastSeen:'25m ago',init:'JD',color:'#d97706'},
+  {name:'Fatima Hassan',flag:'🇦🇪',phone:'+971 50 123 4567',status:'Online',location:'HSR Layout',sos:0,lastSeen:'3m ago',init:'FA',color:'#2563b0'},
+  {name:'Park Min-jun',flag:'🇰🇷',phone:'+82 10 1234 5678',status:'Online',location:'JP Nagar',sos:1,lastSeen:'7m ago',init:'PM2',color:'#f97316'},
+];
+
+let tFilter='all';
+
+function loadData() {
+  document.getElementById('tTotal').textContent=tourists.length;
+  document.getElementById('tOnline').textContent=tourists.filter(t=>t.status==='Online'||t.status==='Checked In').length;
+  document.getElementById('tSOS').textContent=tourists.filter(t=>t.status==='SOS').length;
+  document.getElementById('tMissed').textContent=tourists.filter(t=>t.status==='Missed').length;
+  renderTable(tourists);
+}
+
+function renderTable(data) {
+  const filtered=tFilter==='all'?data:data.filter(t=>t.status===tFilter);
+  const bm={SOS:'badge-red',Online:'badge-green','Checked In':'badge-blue',Missed:'badge-amber',Offline:'badge-gray'};
+  document.getElementById('touristBody').innerHTML=filtered.map(t=>`
+    <tr style="${t.status==='SOS'?'background:rgba(220,38,38,0.04)':''}">
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:50%;background:${t.color}22;color:${t.color};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">${t.init}</div>
+          <div><div style="font-weight:600;color:var(--text)">${t.name}</div><div style="font-size:10px;color:var(--text3)">Tourist App User</div></div>
+        </div>
+      </td>
+      <td>${t.flag}</td>
+      <td style="font-family:var(--mono);font-size:11px">${t.phone}</td>
+      <td><span class="badge ${bm[t.status]||'badge-gray'}">${t.status}</span></td>
+      <td style="font-size:12px">${t.location}</td>
+      <td style="color:${t.sos>0?'var(--red)':'var(--text3)'};font-weight:${t.sos>0?'700':'400'}">${t.sos} alerts</td>
+      <td style="font-size:12px;color:var(--text3)">${t.lastSeen}</td>
+      <td>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-ghost btn-sm" onclick="callTourist('${t.name}')">📞</button>
+          <button class="btn btn-ghost btn-sm" onclick="viewOnMap('${t.name}')">📍</button>
+          ${t.status==='SOS'?`<button class="btn btn-red btn-sm" onclick="respondSOS('${t.name}')">🆘 Respond</button>`:''}
+          ${t.status==='Missed'?`<button class="btn btn-ghost btn-sm" style="color:var(--amber)" onclick="welfareCheck('${t.name}')">👁 Check</button>`:''}
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function setTFilter(f,el) {
+  tFilter=f;
+  document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderTable(tourists);
+}
+
+function filterTourists(q) {
+  const d=tourists.filter(t=>t.name.toLowerCase().includes(q.toLowerCase())||t.location.toLowerCase().includes(q.toLowerCase())||t.phone.includes(q));
+  renderTable(d);
+}
+
+function respondSOS(n){toast(`SOS response dispatched for ${n}`,'success');}
+function welfareCheck(n){toast(`Welfare check initiated for ${n}`,'info');}
+function callTourist(n){toast(`Calling ${n}...`,'info');}
+function viewOnMap(n){toast(`Tracking ${n} on map`,'info');}
+
+function toast(msg,type='info'){
+  const c={success:'var(--green)',error:'var(--red)',info:'var(--police-light)'};
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span style="color:${c[type]}">${type==='success'?'✓':'ℹ'}</span> <span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+loadData();
+</script>
+</body>
+</html>

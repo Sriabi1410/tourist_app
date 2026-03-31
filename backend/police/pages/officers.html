@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Officers — Police Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#06080f;--bg2:#090d18;--bg3:#0d1220;--surface:#101828;--surface2:#162035;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8edf5;--text2:#7a92b0;--text3:#3d5070;--police:#1e3a6b;--police-light:#2563b0;--gold:#d4a017;--red:#dc2626;--green:#059669;--amber:#d97706;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--sidebar-w:260px;--radius:12px;--radius-lg:18px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.sidebar-logo{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.logo-badge{width:44px;height:44px;background:linear-gradient(145deg,var(--police),var(--police-light));border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.logo-text{font-weight:800;font-size:15px;}.logo-sub{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:.8px;text-transform:uppercase;}
+.sidebar-nav{flex:1;padding:10px 0;overflow-y:auto;}
+.nav-section{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:14px 18px 5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;color:var(--text2);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.nav-item:hover{background:var(--surface);color:var(--text);}.nav-item.active{background:var(--surface);color:var(--text);border-left-color:var(--gold);}
+.nav-icon{font-size:15px;width:20px;text-align:center;}.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;}
+.sidebar-officer{padding:14px 18px;border-top:1px solid var(--border);}
+.officer-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.officer-av-lg{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--police),var(--police-light));border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.officer-nm{font-size:13px;font-weight:600;}.officer-rank{font-size:10px;color:var(--gold);}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+.topbar{height:62px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:50;}
+.topbar-left{flex:1;}.topbar-title{font-size:17px;font-weight:800;}.topbar-sub{font-size:11px;color:var(--text3);}
+.content{padding:24px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-police{background:linear-gradient(135deg,var(--police),var(--police-light));color:#fff;}.btn-police:hover{transform:translateY(-1px);}
+.btn-red{background:rgba(220,38,38,.15);color:#fca5a5;border:1px solid rgba(220,38,38,.25);}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.badge-red{background:rgba(220,38,38,.12);color:#fca5a5;}.badge-red::before{background:var(--red);}
+.badge-amber{background:rgba(217,119,6,.12);color:#fcd34d;}.badge-amber::before{background:var(--amber);}
+.badge-green{background:rgba(5,150,105,.12);color:#6ee7b7;}.badge-green::before{background:var(--green);}
+.badge-blue{background:rgba(37,99,176,.15);color:#93c5fd;}.badge-blue::before{background:var(--police-light);}
+.badge-gray{background:rgba(255,255,255,.05);color:var(--text3);}.badge-gray::before{background:var(--text3);}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;}
+.stat-val{font-size:26px;font-weight:800;letter-spacing:-1px;margin-top:8px;}
+.stat-lbl{font-size:11px;color:var(--text3);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-title{font-size:14px;font-weight:700;}.card-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.off-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .2s;}
+.off-card:hover{border-color:var(--border2);transform:translateY(-1px);}
+.off-av{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--police),var(--police-light));border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;}
+.search-bar input{background:none;border:none;color:var(--text);font-size:13px;flex:1;outline:none;font-family:var(--font);}
+.search-bar input::placeholder{color:var(--text3);}
+.toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:13px;animation:tIn .3s ease;min-width:220px;}
+@keyframes tIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">🚔</div>
+    <div><div class="logo-text">Police Portal</div><div class="logo-sub">SafeTravel LEO</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Dispatch</div>
+    <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Command Center</a>
+    <a class="nav-item" href="sos-feed.html"><span class="nav-icon">🆘</span> SOS Feed<span class="nav-badge">3</span></a>
+    <a class="nav-item" href="map.html"><span class="nav-icon">📍</span> Live Map</a>
+    <a class="nav-item" href="dispatch.html"><span class="nav-icon">🚔</span> Dispatch Units</a>
+    <div class="nav-section">Incidents</div>
+    <a class="nav-item" href="incidents.html"><span class="nav-icon">📋</span> Incident Log</a>
+    <a class="nav-item" href="crime-reports.html"><span class="nav-icon">⚠️</span> Crime Reports</a>
+    <a class="nav-item" href="tourists.html"><span class="nav-icon">👥</span> Tourists</a>
+    <a class="nav-item" href="missing.html"><span class="nav-icon">🔍</span> Missing Persons</a>
+    <div class="nav-section">Station</div>
+    <a class="nav-item active" href="officers.html"><span class="nav-icon">👮</span> Officers</a>
+    <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+    <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+  </nav>
+  <div class="sidebar-officer">
+    <div class="officer-card">
+      <div class="officer-av-lg">👮</div>
+      <div><div class="officer-nm">Insp. Rajesh Kumar</div><div class="officer-rank">Badge #4721 · South Div.</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Officers</div>
+      <div class="topbar-sub">South Division personnel roster</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="search-bar" style="width:220px">
+        <span style="color:var(--text3)">🔍</span>
+        <input type="text" placeholder="Search officers..." oninput="filterOfficers(this.value)"/>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="loadData()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="stats-row">
+      <div class="stat" style="border-top:2px solid var(--police-light)">
+        <div style="font-size:18px">👮</div><div class="stat-val" style="color:#93c5fd" id="oTotal">—</div><div class="stat-lbl">Total Officers</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--green)">
+        <div style="font-size:18px">🟢</div><div class="stat-val" style="color:var(--green)" id="oOnDuty">—</div><div class="stat-lbl">On Duty</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--amber)">
+        <div style="font-size:18px">🚔</div><div class="stat-val" style="color:var(--amber)" id="oDispatched">—</div><div class="stat-lbl">Dispatched</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--border)">
+        <div style="font-size:18px">🌙</div><div class="stat-val" style="color:var(--text3)" id="oOffDuty">—</div><div class="stat-lbl">Off Duty</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">Officer Roster</div><div class="card-sub">South Division · Current shift</div></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="setView('grid')" id="gridBtn">⊞ Grid</button>
+          <button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="setView('list')" id="listBtn">≡ List</button>
+        </div>
+      </div>
+      <div id="officerGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px"></div>
+    </div>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+<script>
+let officers = [
+  {name:'Insp. Rajesh Kumar',badge:'#4721',rank:'Inspector',emoji:'👮',unit:'Unit CMD',status:'on-duty',cases:12,shift:'Day',phone:'+91 98100 00001',speciality:'Tourist Safety'},
+  {name:'Const. Anand Kumar',badge:'#3421',rank:'Constable',emoji:'👮',unit:'Unit 07',status:'dispatched',cases:8,shift:'Day',phone:'+91 98100 00002',speciality:'Emergency Response'},
+  {name:'HC Meera Nair',badge:'#2918',rank:'Head Constable',emoji:'👮',unit:'Unit 14',status:'dispatched',cases:15,shift:'Day',phone:'+91 98100 00003',speciality:'Crime Investigation'},
+  {name:'Const. Raju Singh',badge:'#5102',rank:'Constable',emoji:'👮',unit:'Unit 03',status:'on-duty',cases:6,shift:'Day',phone:'+91 98100 00004',speciality:'Patrol'},
+  {name:'HC Fatima Begum',badge:'#4307',rank:'Head Constable',emoji:'👮',unit:'Unit 09',status:'on-duty',cases:9,shift:'Day',phone:'+91 98100 00005',speciality:'Missing Persons'},
+  {name:'SI Prakash Rao',badge:'#3756',rank:'Sub Inspector',emoji:'👮',unit:'Unit 12',status:'on-duty',cases:11,shift:'Day',phone:'+91 98100 00006',speciality:'Crime Reports'},
+  {name:'Const. Kavitha',badge:'#6201',rank:'Constable',emoji:'👮',unit:'Unit 02',status:'off-duty',cases:4,shift:'Night',phone:'+91 98100 00007',speciality:'Patrol'},
+  {name:'HC Suresh Babu',badge:'#2034',rank:'Head Constable',emoji:'👮',unit:'Unit 11',status:'off-duty',cases:7,shift:'Night',phone:'+91 98100 00008',speciality:'Traffic'},
+  {name:'Const. Lakshmi',badge:'#7809',rank:'Constable',emoji:'👮',unit:'Unit 06',status:'off-duty',cases:3,shift:'Night',phone:'+91 98100 00009',speciality:'Patrol'},
+];
+
+let allOfficers=[...officers], viewMode='grid';
+
+function loadData(){
+  document.getElementById('oTotal').textContent=officers.length;
+  document.getElementById('oOnDuty').textContent=officers.filter(o=>o.status==='on-duty').length;
+  document.getElementById('oDispatched').textContent=officers.filter(o=>o.status==='dispatched').length;
+  document.getElementById('oOffDuty').textContent=officers.filter(o=>o.status==='off-duty').length;
+  renderGrid(officers);
+}
+
+function renderGrid(data){
+  const bm={dispatched:'badge-amber','on-duty':'badge-green','off-duty':'badge-gray'};
+  const bl={dispatched:'On Mission','on-duty':'On Duty','off-duty':'Off Duty'};
+  if(viewMode==='grid'){
+    document.getElementById('officerGrid').style.gridTemplateColumns='repeat(3,1fr)';
+    document.getElementById('officerGrid').innerHTML=data.map(o=>`
+      <div class="off-card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div class="off-av">${o.emoji}</div>
+          <div>
+            <div style="font-weight:700;font-size:13px">${o.name}</div>
+            <div style="font-size:10px;color:var(--gold)">${o.rank} · Badge ${o.badge}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <span class="badge ${bm[o.status]}">${bl[o.status]}</span>
+          <span style="font-size:11px;color:#93c5fd">🚔 ${o.unit}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">
+          <div>📋 ${o.cases} cases handled</div>
+          <div>🌟 ${o.speciality}</div>
+          <div>🕐 ${o.shift} Shift</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="toast('Calling ${o.name}...','info')">📞 Radio</button>
+          ${o.status!=='dispatched'?`<button class="btn btn-police btn-sm" style="flex:1" onclick="toast('Dispatching ${o.name}','success')">Dispatch</button>`:'<button class="btn btn-ghost btn-sm" style="flex:1;color:var(--amber)" onclick="toast(\'${o.name} recalled\',\'success\')">Recall</button>'}
+        </div>
+      </div>`).join('');
+  } else {
+    document.getElementById('officerGrid').style.gridTemplateColumns='1fr';
+    document.getElementById('officerGrid').innerHTML=data.map(o=>`
+      <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--border2)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--police),var(--police-light));border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:16px">${o.emoji}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;color:var(--text)">${o.name}</div>
+          <div style="font-size:11px;color:var(--gold)">${o.rank} · Badge ${o.badge} · ${o.unit}</div>
+        </div>
+        <span class="badge ${bm[o.status]}">${bl[o.status]}</span>
+        <span style="font-size:12px;color:var(--text3)">${o.cases} cases</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="toast('Calling ${o.name}','info')">📞</button>
+          <button class="btn btn-police btn-sm" onclick="toast('Dispatching ${o.name}','success')">Send</button>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function setView(mode){
+  viewMode=mode;
+  document.getElementById('gridBtn').style.background = mode==='grid'?'var(--police)':'var(--surface2)';
+  document.getElementById('listBtn').style.background = mode==='list'?'var(--police)':'var(--surface2)';
+  renderGrid(officers);
+}
+
+function filterOfficers(q){
+  const d=officers.filter(o=>o.name.toLowerCase().includes(q.toLowerCase())||o.rank.toLowerCase().includes(q.toLowerCase())||o.unit.toLowerCase().includes(q.toLowerCase()));
+  renderGrid(d);
+}
+
+function toast(msg,type='info'){
+  const c={success:'var(--green)',error:'var(--red)',info:'var(--police-light)'};
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span style="color:${c[type]}">${type==='success'?'✓':'ℹ'}</span> <span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+loadData();
+</script>
+</body>
+</html>

@@ -1,24 +1,22 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../store/db');
 
 // Admin endpoints
 router.get('/dashboard', (req, res) => {
+  const users = db.getUsers();
+  const emergencies = db.getEmergencies();
+  const activeEmergencies = emergencies.filter(e => e.status !== 'resolved' && e.status !== 'cancelled');
+
   res.json({
-    stats: { totalUsers: 1247, activeEmergencies: 3, alertsToday: 12, responseRate: '94%' },
-    recentEmergencies: [
-      { id: 'EMG-001', type: 'medical', status: 'active', location: 'Connaught Place', time: '2 min ago' },
-      { id: 'EMG-002', type: 'theft', status: 'responding', location: 'Red Fort', time: '15 min ago' },
-      { id: 'EMG-003', type: 'accident', status: 'resolved', location: 'Karol Bagh', time: '1 hr ago' },
-    ],
+    stats: { totalUsers: users.length, activeEmergencies: activeEmergencies.length, alertsToday: emergencies.length, responseRate: '94%' },
+    recentEmergencies: emergencies.slice(0, 5),
   });
 });
 
 router.get('/users', (req, res) => {
-  res.json({ users: [
-    { id: 'USR-001', name: 'John Doe', email: 'john@example.com', nationality: 'USA', status: 'active', lastSeen: '5 min ago' },
-    { id: 'USR-002', name: 'Jane Smith', email: 'jane@example.com', nationality: 'UK', status: 'active', lastSeen: '12 min ago' },
-    { id: 'USR-003', name: 'Raj Patel', email: 'raj@example.com', nationality: 'India', status: 'offline', lastSeen: '2 hrs ago' },
-  ], total: 1247 });
+  const users = db.getUsers();
+  res.json({ users, total: users.length });
 });
 
 router.get('/reports', (req, res) => {

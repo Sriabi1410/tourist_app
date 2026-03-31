@@ -1,36 +1,622 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeRoam Admin</title>
-    <link rel="stylesheet" href="css/admin.css">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SafeTravel Admin — Dashboard</title>
+<link rel="stylesheet" href="css/design-system.css"/>
+<style>
+/* SOS alert banner */
+.sos-banner {
+  background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05));
+  border: 1px solid rgba(239,68,68,0.35);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform: none; } }
+.sos-icon-wrap {
+  width: 44px; height: 44px;
+  background: rgba(239,68,68,0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  animation: pulse-ring 2s infinite;
+}
+.sos-banner-text { flex: 1; }
+.sos-banner-title { font-weight: 700; color: #fca5a5; font-size: 14px; }
+.sos-banner-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.sos-banner-actions { display: flex; gap: 8px; }
+
+/* Activity feed */
+.activity-feed { display: flex; flex-direction: column; gap: 0; }
+.activity-item {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.activity-item:last-child { border-bottom: none; padding-bottom: 0; }
+.activity-dot-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 4px; }
+.activity-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.activity-line { flex: 1; width: 1px; background: var(--border); margin: 4px 0; }
+.activity-item:last-child .activity-line { display: none; }
+.activity-content { flex: 1; }
+.activity-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.activity-meta { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+/* Map with user pins */
+.map-pins { position: absolute; inset: 0; }
+.map-pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.map-pin:hover { transform: translate(-50%, -100%) scale(1.15); }
+.pin-bubble {
+  width: 32px; height: 32px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.pin-bubble .pin-inner {
+  transform: rotate(45deg);
+  font-size: 14px;
+}
+.pin-label {
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-top: 4px;
+  white-space: nowrap;
+  color: var(--text2);
+}
+
+/* Chart bars */
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 80px; }
+.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-height: 4px;
+}
+.bar-label { font-size: 10px; color: var(--text3); }
+</style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-icon">🛡️</div>
-            <h1>SafeRoam Admin</h1>
-            <p class="login-subtitle">Emergency Monitoring Dashboard</p>
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="email" placeholder="admin@saferoam.app" value="admin@saferoam.app" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="password" placeholder="••••••••" value="admin123" required>
-                </div>
-                <button type="submit" class="btn-primary">Sign In</button>
-            </form>
-            <p class="login-footer">Authorized personnel only</p>
-        </div>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">🛡️</div>
+      <div>
+        <div class="logo-text">SafeTravel</div>
+        <div class="logo-sub">Admin Portal</div>
+      </div>
     </div>
-    <script>
-        function handleLogin(e) {
-            e.preventDefault();
-            window.location.href = 'dashboard.html';
-        }
-    </script>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item active" href="index.html">
+        <span class="nav-icon">⊞</span> Dashboard
+      </a>
+      <a class="nav-item" href="pages/live-tracking.html">
+        <span class="nav-icon">📍</span> Live Tracking
+        <span class="nav-badge">247</span>
+      </a>
+      <a class="nav-item" href="pages/sos-alerts.html">
+        <span class="nav-icon">🆘</span> SOS Alerts
+        <span class="nav-badge">3</span>
+      </a>
+
+      <div class="nav-section-label">Management</div>
+      <a class="nav-item" href="pages/users.html">
+        <span class="nav-icon">👥</span> Users
+      </a>
+      <a class="nav-item" href="pages/alert-management.html">
+        <span class="nav-icon">📢</span> Broadcast Alerts
+      </a>
+      <a class="nav-item" href="pages/crime-data.html">
+        <span class="nav-icon">⚠️</span> Crime Data
+      </a>
+
+      <div class="nav-section-label">Intelligence</div>
+      <a class="nav-item" href="pages/reports.html">
+        <span class="nav-icon">📊</span> Reports
+      </a>
+      <a class="nav-item" href="pages/zones.html">
+        <span class="nav-icon">🗺️</span> Safety Zones
+      </a>
+
+      <div class="nav-section-label">System</div>
+      <a class="nav-item" href="pages/settings.html">
+        <span class="nav-icon">⚙️</span> Settings
+      </a>
+      <a class="nav-item" href="../admin/login.html" id="logoutBtn">
+        <span class="nav-icon">🚪</span> Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff">A</div>
+        <div>
+          <div class="user-name">Admin User</div>
+          <div class="user-role">Super Administrator</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Dashboard</div>
+        <span class="topbar-subtitle">Emergency Command Center</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="live-dot">LIVE</div>
+        <button class="btn btn-ghost btn-sm" onclick="refreshData()">↻ Refresh</button>
+        <button class="btn btn-danger btn-sm" onclick="openModal('broadcastModal')">📢 Broadcast Alert</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- SOS Active Banner -->
+      <div class="sos-banner">
+        <div class="sos-icon-wrap">🆘</div>
+        <div class="sos-banner-text">
+          <div class="sos-banner-title">3 Active SOS Alerts Require Immediate Attention</div>
+          <div class="sos-banner-sub">Rahul S. (Medical) · Priya M. (Accident) · John D. (Missed Check-In) — updated 42s ago</div>
+        </div>
+        <div class="sos-banner-actions">
+          <a href="pages/sos-alerts.html" class="btn btn-danger btn-sm">View All SOS</a>
+          <button class="btn btn-ghost btn-sm" onclick="this.closest('.sos-banner').remove()">✕</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card red">
+          <div class="stat-icon red">🆘</div>
+          <div class="stat-value text-red">3</div>
+          <div class="stat-label">Active SOS Alerts</div>
+          <div class="stat-change down">↑ 2 from yesterday</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">👥</div>
+          <div class="stat-value" style="color:var(--accent)">247</div>
+          <div class="stat-label">Online Users</div>
+          <div class="stat-change up">↑ 18% this hour</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-icon amber">⚠️</div>
+          <div class="stat-value" style="color:var(--amber)">18</div>
+          <div class="stat-label">Alerts Today</div>
+          <div class="stat-change down">↑ 5 new</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">✓</div>
+          <div class="stat-value text-green">94</div>
+          <div class="stat-label">Check-ins Today</div>
+          <div class="stat-change up">↑ 12 from yesterday</div>
+        </div>
+        <div class="stat-card" style="">
+          <div class="stat-icon" style="background:rgba(139,92,246,0.15)">⏱</div>
+          <div class="stat-value" style="color:var(--purple)">4.2m</div>
+          <div class="stat-label">Avg Response Time</div>
+          <div class="stat-change up">↓ 30s faster</div>
+        </div>
+      </div>
+
+      <!-- Live Map + Activity -->
+      <div class="grid-2 mb-6">
+        <!-- Map -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Live User Map</div>
+              <div class="card-subtitle">Real-time tourist locations</div>
+            </div>
+            <a href="pages/live-tracking.html" class="btn btn-ghost btn-sm">Full Map →</a>
+          </div>
+          <div class="map-container" style="height:280px">
+            <div class="map-grid"></div>
+            <!-- Roads -->
+            <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.3" viewBox="0 0 600 280">
+              <line x1="100" y1="0" x2="100" y2="280" stroke="#334155" stroke-width="12"/>
+              <line x1="0" y1="120" x2="600" y2="120" stroke="#334155" stroke-width="12"/>
+              <line x1="0" y1="200" x2="600" y2="200" stroke="#334155" stroke-width="8"/>
+              <line x1="350" y1="0" x2="350" y2="280" stroke="#334155" stroke-width="8"/>
+            </svg>
+            <div class="map-pins">
+              <!-- SOS pin -->
+              <div class="map-pin" style="left:42%;top:55%" title="Rahul S. — SOS Active">
+                <div class="pin-bubble" style="background:#ef4444">
+                  <div class="pin-inner">🆘</div>
+                </div>
+                <div class="pin-label" style="color:#fca5a5">Rahul S.</div>
+              </div>
+              <!-- Normal users -->
+              <div class="map-pin" style="left:28%;top:38%">
+                <div class="pin-bubble" style="background:#3b82f6">
+                  <div class="pin-inner">👤</div>
+                </div>
+                <div class="pin-label">Yuki T.</div>
+              </div>
+              <div class="map-pin" style="left:65%;top:62%">
+                <div class="pin-bubble" style="background:#3b82f6">
+                  <div class="pin-inner">👤</div>
+                </div>
+                <div class="pin-label">Li W.</div>
+              </div>
+              <div class="map-pin" style="left:72%;top:35%">
+                <div class="pin-bubble" style="background:#10b981">
+                  <div class="pin-inner">✓</div>
+                </div>
+                <div class="pin-label">Sara K.</div>
+              </div>
+              <div class="map-pin" style="left:20%;top:70%">
+                <div class="pin-bubble" style="background:#f59e0b">
+                  <div class="pin-inner">⚠️</div>
+                </div>
+                <div class="pin-label">John D.</div>
+              </div>
+            </div>
+            <!-- Map legend -->
+            <div style="position:absolute;bottom:12px;left:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;display:flex;gap:12px">
+              <span style="font-size:11px;color:#fca5a5">🔴 SOS</span>
+              <span style="font-size:11px;color:#93c5fd">🔵 Normal</span>
+              <span style="font-size:11px;color:#6ee7b7">🟢 Checked In</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Live Activity Feed</div>
+              <div class="card-subtitle">Real-time events</div>
+            </div>
+            <div class="live-dot">LIVE</div>
+          </div>
+          <div class="activity-feed" id="activityFeed">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- SOS table + Chart -->
+      <div class="grid-2 mb-6">
+        <!-- Active SOS -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Active SOS Incidents</div>
+              <div class="card-subtitle">Requires immediate response</div>
+            </div>
+            <span class="badge red">3 Active</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Type</th>
+                  <th>Location</th>
+                  <th>Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong style="color:var(--text)">Rahul S.</strong><br><span class="text-muted text-sm">IN • +91 98765</span></td>
+                  <td><span class="badge red">Medical</span></td>
+                  <td><span class="font-mono text-sm">12.9716, 77.5946</span></td>
+                  <td class="text-red">2m ago</td>
+                  <td><button class="btn btn-danger btn-sm" onclick="respondSOS('Rahul S.')">Respond</button></td>
+                </tr>
+                <tr>
+                  <td><strong style="color:var(--text)">Priya M.</strong><br><span class="text-muted text-sm">IN • +91 91234</span></td>
+                  <td><span class="badge amber">Accident</span></td>
+                  <td><span class="font-mono text-sm">12.9741, 77.6101</span></td>
+                  <td class="text-amber">8m ago</td>
+                  <td><button class="btn btn-danger btn-sm" onclick="respondSOS('Priya M.')">Respond</button></td>
+                </tr>
+                <tr>
+                  <td><strong style="color:var(--text)">John D.</strong><br><span class="text-muted text-sm">US • +1 555-0123</span></td>
+                  <td><span class="badge purple">Missed Check-In</span></td>
+                  <td><span class="font-mono text-sm">12.9600, 77.6200</span></td>
+                  <td>25m ago</td>
+                  <td><button class="btn btn-ghost btn-sm" onclick="respondSOS('John D.')">Investigate</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Weekly chart -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">SOS This Week</div>
+              <div class="card-subtitle">Daily emergency breakdown</div>
+            </div>
+            <a href="pages/reports.html" class="btn btn-ghost btn-sm">Full Report →</a>
+          </div>
+          <div style="margin-bottom:12px">
+            <div class="bar-chart" id="weekChart"></div>
+            <div style="display:flex;justify-content:center;gap:16px;margin-top:12px">
+              <span style="font-size:11px;color:var(--text3)">🔴 Medical  🟡 Accident  🔵 Crime  ⬜ Other</span>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:22px;font-weight:700;color:var(--red)">23</div>
+              <div style="font-size:11px;color:var(--text3)">Total This Month</div>
+            </div>
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:22px;font-weight:700;color:var(--green)">96%</div>
+              <div style="font-size:11px;color:var(--text3)">Resolution Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent users + Alert areas -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Users</div>
+            <a href="pages/users.html" class="btn btn-ghost btn-sm">All Users →</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Country</th><th>Status</th><th>Last Seen</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong style="color:var(--text)">Rahul Sharma</strong></td>
+                  <td>🇮🇳 India</td>
+                  <td><span class="badge red">SOS</span></td>
+                  <td>Now</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:var(--text)">Yuki Tanaka</strong></td>
+                  <td>🇯🇵 Japan</td>
+                  <td><span class="badge green">Online</span></td>
+                  <td>2m ago</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:var(--text)">Li Wei</strong></td>
+                  <td>🇨🇳 China</td>
+                  <td><span class="badge green">Online</span></td>
+                  <td>5m ago</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:var(--text)">Sara Kovacs</strong></td>
+                  <td>🇩🇪 Germany</td>
+                  <td><span class="badge blue">Checked In</span></td>
+                  <td>12m ago</td>
+                </tr>
+                <tr>
+                  <td><strong style="color:var(--text)">John Doe</strong></td>
+                  <td>🇺🇸 USA</td>
+                  <td><span class="badge amber">Missed</span></td>
+                  <td>25m ago</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top Alert Zones</div>
+            <a href="pages/crime-data.html" class="btn btn-ghost btn-sm">Manage →</a>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div id="alertZones"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main-content -->
+</div><!-- /app-layout -->
+
+<!-- Broadcast Modal -->
+<div class="modal-overlay" id="broadcastModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📢 Broadcast Alert</div>
+      <button class="modal-close" onclick="closeModal('broadcastModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="input-group">
+        <label class="input-label">Alert Type</label>
+        <select class="input">
+          <option>Crime Warning</option>
+          <option>Weather Alert</option>
+          <option>Traffic / Road Closure</option>
+          <option>Natural Disaster</option>
+          <option>General Safety</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Alert Title</label>
+        <input class="input" placeholder="e.g. Pickpocket Alert — Central Market"/>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Message</label>
+        <textarea class="input" rows="3" placeholder="Describe the alert..."></textarea>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Severity</label>
+        <select class="input">
+          <option>HIGH — Immediate Danger</option>
+          <option>MEDIUM — Exercise Caution</option>
+          <option>LOW — Informational</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Target Area</label>
+        <input class="input" placeholder="All users / Specify zone..."/>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn btn-ghost" style="flex:1" onclick="closeModal('broadcastModal')">Cancel</button>
+        <button class="btn btn-danger" style="flex:1" onclick="broadcastAlert()">📢 Broadcast Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+const activities = [
+  { color: '#ef4444', icon: '🆘', title: 'SOS triggered by Rahul S.', meta: 'Medical Emergency · Koramangala · 2m ago' },
+  { color: '#f59e0b', icon: '⚠️', title: 'Crime report filed: Pickpocketing', meta: 'Central Market · Verified · 8m ago' },
+  { color: '#3b82f6', icon: '📍', title: 'Priya M. shared live location', meta: 'MG Road · Online · 12m ago' },
+  { color: '#10b981', icon: '✓', title: 'Sara K. completed check-in', meta: 'Airport Zone · 18m ago' },
+  { color: '#8b5cf6', icon: '📢', title: 'Weather alert broadcast sent', meta: 'Heavy Rain Warning · 2,400 users notified · 32m ago' },
+  { color: '#06b6d4', icon: '🗺️', title: 'New safety zone created', meta: 'Admin: Zone #14 — Brigade Road · 45m ago' },
+];
+
+const zones = [
+  { name: 'Central Market', incidents: 12, change: '+3', level: 'red' },
+  { name: 'MG Road Junction', incidents: 8, change: '+1', level: 'amber' },
+  { name: 'Airport Terminal 2', incidents: 5, change: '-2', level: 'amber' },
+  { name: 'Majestic Station', incidents: 4, change: '0', level: 'amber' },
+  { name: 'Brigade Road', incidents: 3, change: '+1', level: 'blue' },
+];
+
+const weekData = [
+  { day: 'Mon', vals: [3, 1, 2, 1], total: 7 },
+  { day: 'Tue', vals: [2, 2, 1, 0], total: 5 },
+  { day: 'Wed', vals: [4, 1, 3, 1], total: 9 },
+  { day: 'Thu', vals: [1, 3, 1, 2], total: 7 },
+  { day: 'Fri', vals: [5, 2, 2, 1], total: 10 },
+  { day: 'Sat', vals: [2, 1, 1, 0], total: 4 },
+  { day: 'Sun', vals: [3, 2, 1, 1], total: 7 },
+];
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderActivity() {
+  const feed = document.getElementById('activityFeed');
+  feed.innerHTML = activities.map(a => `
+    <div class="activity-item">
+      <div class="activity-dot-wrap">
+        <div class="activity-dot" style="background:${a.color}"></div>
+        <div class="activity-line"></div>
+      </div>
+      <div class="activity-content">
+        <div class="activity-title">${a.icon} ${a.title}</div>
+        <div class="activity-meta">${a.meta}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderZones() {
+  const max = Math.max(...zones.map(z => z.incidents));
+  document.getElementById('alertZones').innerHTML = zones.map(z => `
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <span style="font-size:13px;font-weight:500;color:var(--text)">${z.name}</span>
+        <span class="badge ${z.level}">${z.incidents} incidents</span>
+      </div>
+      <div style="background:var(--bg3);border-radius:4px;height:6px;overflow:hidden">
+        <div style="height:100%;width:${(z.incidents/max*100).toFixed(0)}%;background:var(--${z.level === 'red' ? 'red' : z.level === 'amber' ? 'amber' : 'accent'});border-radius:4px;transition:width 0.8s ease"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderChart() {
+  const max = Math.max(...weekData.map(d => d.total));
+  const colors = ['#ef4444','#f59e0b','#3b82f6','#64748b'];
+  document.getElementById('weekChart').innerHTML = weekData.map(d => `
+    <div class="bar-wrap">
+      <div class="bar" style="height:${Math.max((d.total/max)*76,4)}px;background:linear-gradient(to top,${colors[0]},${colors[0]}60)"></div>
+      <div class="bar-label">${d.day}</div>
+    </div>
+  `).join('');
+}
+
+// ── Interactions ──────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function showToast(msg, type = 'success') {
+  const icons = { success: '✓', error: '✕', info: 'ℹ', warn: '⚠️' };
+  const colors = { success: 'var(--green)', error: 'var(--red)', info: 'var(--accent)', warn: 'var(--amber)' };
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<span style="color:${colors[type]};font-size:16px">${icons[type]}</span> <span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function respondSOS(name) {
+  showToast(`Response dispatched for ${name}`, 'success');
+}
+
+function broadcastAlert() {
+  closeModal('broadcastModal');
+  showToast('Alert broadcast sent to 2,847 users', 'success');
+}
+
+function refreshData() {
+  showToast('Dashboard refreshed', 'info');
+}
+
+// ── Live activity feed simulation ─────────────────────────────────────────────
+const newEvents = [
+  { color: '#10b981', icon: '✓', title: 'New user check-in', meta: 'Kenji M. · Indiranagar · Just now' },
+  { color: '#3b82f6', icon: '📍', title: 'Location update received', meta: 'Tourist #1092 · Brigade Road · Just now' },
+  { color: '#f59e0b', icon: '⚠️', title: 'Weather alert triggered', meta: 'Heavy rain detected · Auto-broadcast · Just now' },
+];
+let eventIdx = 0;
+setInterval(() => {
+  activities.unshift(newEvents[eventIdx % newEvents.length]);
+  if (activities.length > 8) activities.pop();
+  renderActivity();
+  eventIdx++;
+}, 8000);
+
+// Init
+renderActivity();
+renderZones();
+renderChart();
+</script>
 </body>
 </html>

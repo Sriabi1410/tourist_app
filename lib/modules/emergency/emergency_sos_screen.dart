@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../app/colors.dart';
 import '../../app/routes.dart';
+import '../../core/providers/auth_provider.dart';
 import '../../core/providers/emergency_provider.dart';
 import '../../core/providers/location_provider.dart';
 
@@ -55,10 +56,19 @@ class _EmergencySosScreenState extends State<EmergencySosScreen>
     HapticFeedback.heavyImpact();
     final emergency = context.read<EmergencyProvider>();
     final location = context.read<LocationProvider>();
+    final auth = context.read<AuthProvider>();
+    final trustedNumbers = auth.emergencyContacts
+        .map((contact) => contact['phone'] ?? '')
+        .where((phone) => phone.isNotEmpty)
+        .toList();
+
     emergency.triggerSos(
       type: EmergencyType.other,
       lat: location.latitude,
       lng: location.longitude,
+      userId: auth.userId,
+      userName: auth.userName,
+      trustedContacts: trustedNumbers,
     );
   }
 
@@ -153,7 +163,6 @@ class _EmergencySosScreenState extends State<EmergencySosScreen>
   }
 
   Widget _buildActivated() {
-    final emergency = context.watch<EmergencyProvider>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(

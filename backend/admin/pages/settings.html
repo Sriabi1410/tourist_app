@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Settings — SafeTravel Admin</title>
+<link rel="stylesheet" href="../css/design-system.css"/>
+<style>
+.settings-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px; margin-bottom:16px; }
+.settings-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+.settings-sub { font-size:12px; color:var(--text3); margin-bottom:20px; }
+.setting-row { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--border); }
+.setting-row:last-child { border-bottom:none; padding-bottom:0; }
+.setting-info { flex:1; }
+.setting-label { font-size:13px; font-weight:600; color:var(--text); }
+.setting-desc { font-size:11px; color:var(--text3); margin-top:2px; }
+.toggle { position:relative; width:44px; height:24px; cursor:pointer; flex-shrink:0; }
+.toggle input { display:none; }
+.toggle-track { position:absolute; inset:0; background:var(--bg3); border-radius:12px; border:1px solid var(--border2); transition:background 0.2s; }
+.toggle input:checked ~ .toggle-track { background:var(--accent); border-color:var(--accent); }
+.toggle-thumb { position:absolute; left:3px; top:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform 0.2s; }
+.toggle input:checked ~ .toggle-track .toggle-thumb { transform:translateX(20px); }
+.api-key { font-family:var(--mono); font-size:12px; background:var(--bg3); padding:10px 14px; border-radius:var(--radius); border:1px solid var(--border); color:var(--text2); word-break:break-all; }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">🛡️</div>
+      <div><div class="logo-text">SafeTravel</div><div class="logo-sub">Admin Portal</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a class="nav-item" href="live-tracking.html"><span class="nav-icon">📍</span> Live Tracking</a>
+      <a class="nav-item" href="sos-alerts.html"><span class="nav-icon">🆘</span> SOS Alerts</a>
+      <div class="nav-section-label">Management</div>
+      <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+      <a class="nav-item" href="alert-management.html"><span class="nav-icon">📢</span> Broadcast Alerts</a>
+      <a class="nav-item" href="crime-data.html"><span class="nav-icon">⚠️</span> Crime Data</a>
+      <div class="nav-section-label">Intelligence</div>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+      <a class="nav-item" href="zones.html"><span class="nav-icon">🗺️</span> Safety Zones</a>
+      <div class="nav-section-label">System</div>
+      <a class="nav-item active" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+      <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff">A</div>
+        <div><div class="user-name">Admin User</div><div class="user-role">Super Administrator</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Settings</div>
+        <span class="topbar-subtitle">System configuration and administration</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="resetAll()">↺ Reset to Default</button>
+        <button class="btn btn-primary btn-sm" onclick="saveSettings()">💾 Save Changes</button>
+      </div>
+    </div>
+
+    <div class="page-content" style="max-width:900px">
+
+      <!-- System Status -->
+      <div class="settings-section">
+        <div class="settings-title">⚡ System Status</div>
+        <div class="settings-sub">Real-time backend health</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+          <div style="background:var(--bg3);border-radius:12px;padding:14px;text-align:center">
+            <div style="font-size:20px">🟢</div>
+            <div style="font-size:13px;font-weight:700;color:var(--green);margin-top:4px">Online</div>
+            <div style="font-size:11px;color:var(--text3)">API Server</div>
+          </div>
+          <div style="background:var(--bg3);border-radius:12px;padding:14px;text-align:center">
+            <div style="font-size:20px">🟢</div>
+            <div style="font-size:13px;font-weight:700;color:var(--green);margin-top:4px">Connected</div>
+            <div style="font-size:11px;color:var(--text3)">Database</div>
+          </div>
+          <div style="background:var(--bg3);border-radius:12px;padding:14px;text-align:center">
+            <div style="font-size:20px" id="smsIcon">🟢</div>
+            <div style="font-size:13px;font-weight:700;color:var(--green);margin-top:4px" id="smsStatus">Active</div>
+            <div style="font-size:11px;color:var(--text3)">SMS Gateway</div>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="checkHealth()">🔍 Run Health Check</button>
+      </div>
+
+      <!-- Notifications -->
+      <div class="settings-section">
+        <div class="settings-title">🔔 Notifications</div>
+        <div class="settings-sub">Configure alert and notification behavior</div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">SOS Alert Push Notifications</div><div class="setting-desc">Receive push notifications for new SOS alerts</div></div>
+          <label class="toggle"><input type="checkbox" checked id="tgSOS"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">Missed Check-In Alerts</div><div class="setting-desc">Alert when tourists miss scheduled check-ins</div></div>
+          <label class="toggle"><input type="checkbox" checked id="tgCheckin"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">Crime Report Notifications</div><div class="setting-desc">New crime reports filed in your jurisdiction</div></div>
+          <label class="toggle"><input type="checkbox" id="tgCrime"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">Email Digest</div><div class="setting-desc">Daily summary email at 8:00 AM</div></div>
+          <label class="toggle"><input type="checkbox" checked id="tgEmail"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">Auto-Dispatch SMS to Police</div><div class="setting-desc">Automatically notify police units on SOS trigger</div></div>
+          <label class="toggle"><input type="checkbox" checked id="tgDispatch"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+      </div>
+
+      <!-- Admin account -->
+      <div class="settings-section">
+        <div class="settings-title">👤 Admin Account</div>
+        <div class="settings-sub">Manage administrator profile and credentials</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="input-group"><label class="input-label">Full Name</label><input class="input" value="Admin User" id="adminName"/></div>
+          <div class="input-group"><label class="input-label">Email</label><input class="input" value="admin@safetravel.in" id="adminEmail" type="email"/></div>
+          <div class="input-group"><label class="input-label">Phone</label><input class="input" value="+91 98765 00001" id="adminPhone"/></div>
+          <div class="input-group"><label class="input-label">Department</label><input class="input" value="Tourist Safety Division" id="adminDept"/></div>
+        </div>
+        <div style="margin-top:14px">
+          <button class="btn btn-ghost btn-sm" onclick="changePassword()">🔑 Change Password</button>
+        </div>
+      </div>
+
+      <!-- API Configuration -->
+      <div class="settings-section">
+        <div class="settings-title">🔧 API Configuration</div>
+        <div class="settings-sub">Backend server and API key management</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="input-group">
+            <label class="input-label">API Base URL</label>
+            <input class="input" id="apiUrl" value="http://localhost:3000/api"/>
+          </div>
+          <div class="input-group">
+            <label class="input-label">API Key (Read Only)</label>
+            <div class="api-key" id="apiKeyDisplay">sk-safetravel-••••••••••••••••••••••••••••••</div>
+            <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="revealKey()">👁 Reveal Key</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="settings-section" style="border-color:rgba(239,68,68,0.3)">
+        <div class="settings-title" style="color:var(--red)">⚠️ Danger Zone</div>
+        <div class="settings-sub">Irreversible actions — proceed with extreme caution</div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">Clear All Emergency Records</div><div class="setting-desc">Permanently delete all SOS history and emergency logs</div></div>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:rgba(239,68,68,0.3)" onclick="confirmDangerAction('clear records')">Clear Records</button>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-label">Export & Backup Data</div><div class="setting-desc">Download a full system backup as JSON</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="exportData()">⬇ Export Backup</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script>
+const API = 'http://localhost:3000/api';
+
+async function checkHealth() {
+  try {
+    const res = await fetch(`${API}/health`);
+    if (res.ok) { const d = await res.json(); showToast(`API Online — ${d.service} v${d.version}`, 'success'); }
+    else throw new Error();
+  } catch { showToast('API server not reachable', 'error'); }
+}
+
+function saveSettings() { showToast('Settings saved successfully', 'success'); }
+function resetAll() { showToast('Settings reset to default', 'info'); }
+function changePassword() { showToast('Password change email sent', 'info'); }
+function revealKey() {
+  const el = document.getElementById('apiKeyDisplay');
+  el.textContent = 'sk-safetravel-admin-2025-a7f3c91b4d8e2f0a1c6b5d3e9f7a2c4b';
+  showToast('API key revealed — keep it secret!', 'info');
+}
+function exportData() { showToast('Backup exported as system_backup.json', 'success'); }
+function confirmDangerAction(action) { if(confirm(`Are you sure you want to ${action}? This cannot be undone.`)) showToast(`Action performed: ${action}`, 'info'); }
+
+function showToast(msg, type='success') {
+  const c={success:'var(--green)',error:'var(--red)',info:'var(--accent)'};
+  const i={success:'✓',error:'✕',info:'ℹ'};
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<span style="color:${c[type]}">${i[type]}</span> <span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+checkHealth();
+</script>
+</body>
+</html>

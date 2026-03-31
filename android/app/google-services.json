@@ -1,20 +1,21 @@
 {
   "project_info": {
-    "project_number": "YOUR_PROJECT_NUMBER",
-    "project_id": "YOUR_PROJECT_ID",
-    "storage_bucket": "YOUR_PROJECT_ID.appspot.com"
+    "project_number": "844331073580",
+    "project_id": "tourist-f34b4",
+    "storage_bucket": "tourist-f34b4.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:YOUR_PROJECT_NUMBER:android:YOUR_APP_ID",
-        "android_info": {
-          "package_name": "com.tourist.safety.tourist_safety_app"
+        "mobilesdk_app_id": "1:844331073580:android:1a10197e0de669a7435189",
+        "android_client_info": {
+          "package_name": "com.example.modul_1"
         }
       },
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "YOUR_API_KEY"
+          "current_key": "AIzaSyBa4bLTQRMSXDkaMdJ58Ls25_AchJXFe50"
         }
       ],
       "services": {

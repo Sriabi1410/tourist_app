@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Users — SafeTravel Admin</title>
+<link rel="stylesheet" href="../css/design-system.css"/>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">🛡️</div>
+      <div><div class="logo-text">SafeTravel</div><div class="logo-sub">Admin Portal</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a class="nav-item" href="live-tracking.html"><span class="nav-icon">📍</span> Live Tracking</a>
+      <a class="nav-item" href="sos-alerts.html"><span class="nav-icon">🆘</span> SOS Alerts<span class="nav-badge">3</span></a>
+      <a class="nav-item active" href="users.html"><span class="nav-icon">👥</span> Users</a>
+      <a class="nav-item" href="alert-management.html"><span class="nav-icon">📢</span> Broadcast Alerts</a>
+      <a class="nav-item" href="crime-data.html"><span class="nav-icon">⚠️</span> Crime Data</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+      <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff">A</div>
+        <div><div class="user-name">Admin User</div><div class="user-role">Super Administrator</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">User Management</div>
+        <span class="topbar-subtitle">1,247 registered users</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="search-bar" style="width:220px">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search users..." oninput="filterUsers(this.value)"/>
+        </div>
+        <button class="btn btn-ghost btn-sm">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="stats-grid mb-6" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card blue"><div class="stat-icon blue">👥</div><div class="stat-value" style="color:var(--accent)">1,247</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card green"><div class="stat-icon green">🟢</div><div class="stat-value text-green">247</div><div class="stat-label">Online Now</div></div>
+        <div class="stat-card red"><div class="stat-icon red">🆘</div><div class="stat-value text-red">3</div><div class="stat-label">SOS Active</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">⚠️</div><div class="stat-value" style="color:var(--amber)">12</div><div class="stat-label">Missed Check-In</div></div>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="flex gap-2 mb-4">
+        <button class="btn btn-primary btn-sm">All Users</button>
+        <button class="btn btn-ghost btn-sm">Online (247)</button>
+        <button class="btn btn-ghost btn-sm">SOS Active (3)</button>
+        <button class="btn btn-ghost btn-sm">Offline (988)</button>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto">+ Add User</button>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table id="usersTable">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Country</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Last Location</th>
+                <th>SOS History</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const users = [
+  { name: 'Rahul Sharma', email: 'rahul@email.com', country: '🇮🇳 India', phone: '+91 98765 43210', status: 'SOS', location: 'Koramangala, BLR', sos: 1, joined: 'Jan 10, 2025', initials: 'RS', color: '#ef4444' },
+  { name: 'Priya Mehta', email: 'priya@email.com', country: '🇮🇳 India', phone: '+91 91234 56789', status: 'Online', location: 'MG Road, BLR', sos: 0, joined: 'Jan 12, 2025', initials: 'PM', color: '#3b82f6' },
+  { name: 'Yuki Tanaka', email: 'yuki@email.com', country: '🇯🇵 Japan', phone: '+81 90 1234 5678', status: 'Online', location: 'Indiranagar, BLR', sos: 2, joined: 'Feb 03, 2025', initials: 'YT', color: '#8b5cf6' },
+  { name: 'Li Wei', email: 'liwei@email.com', country: '🇨🇳 China', phone: '+86 138 0000 1234', status: 'Offline', location: 'Airport, BLR', sos: 0, joined: 'Feb 14, 2025', initials: 'LW', color: '#10b981' },
+  { name: 'Sara Kovacs', email: 'sara@email.com', country: '🇩🇪 Germany', phone: '+49 170 123 4567', status: 'Checked In', location: 'Whitefield, BLR', sos: 0, joined: 'Mar 01, 2025', initials: 'SK', color: '#06b6d4' },
+  { name: 'John Doe', email: 'john@email.com', country: '🇺🇸 USA', phone: '+1 555 012 3456', status: 'Missed', location: 'Last: Airport', sos: 3, joined: 'Dec 20, 2024', initials: 'JD', color: '#f59e0b' },
+  { name: 'Fatima Al-Hassan', email: 'fatima@email.com', country: '🇦🇪 UAE', phone: '+971 50 123 4567', status: 'Online', location: 'HSR Layout, BLR', sos: 0, joined: 'Mar 10, 2025', initials: 'FA', color: '#3b82f6' },
+  { name: 'Park Min-jun', email: 'park@email.com', country: '🇰🇷 Korea', phone: '+82 10 1234 5678', status: 'Offline', location: 'JP Nagar, BLR', sos: 1, joined: 'Mar 15, 2025', initials: 'PM', color: '#f97316' },
+];
+
+const statusBadge = s => {
+  const m = { SOS: 'red', Online: 'green', Offline: 'gray', 'Checked In': 'blue', Missed: 'amber' };
+  return `<span class="badge ${m[s] || 'gray'}">${s}</span>`;
+};
+
+function renderUsers(data) {
+  document.getElementById('usersBody').innerHTML = data.map(u => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:50%;background:${u.color}22;color:${u.color};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0">${u.initials}</div>
+          <div>
+            <div style="font-weight:600;color:var(--text);font-size:13px">${u.name}</div>
+            <div style="font-size:11px;color:var(--text3)">${u.email}</div>
+          </div>
+        </div>
+      </td>
+      <td>${u.country}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px">${u.phone}</td>
+      <td>${statusBadge(u.status)}</td>
+      <td style="font-size:12px;color:var(--text2)">${u.location}</td>
+      <td><span style="color:${u.sos > 0 ? 'var(--red)' : 'var(--text3)'};font-weight:${u.sos > 0 ? '700' : '400'}">${u.sos} alerts</span></td>
+      <td style="font-size:12px;color:var(--text3)">${u.joined}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="viewUser('${u.name}')">View</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="suspendUser('${u.name}')">Suspend</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterUsers(q) {
+  renderUsers(users.filter(u => u.name.toLowerCase().includes(q.toLowerCase()) || u.email.includes(q) || u.country.includes(q)));
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<span style="color:var(--green)">✓</span> ${msg}`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+function viewUser(name) { showToast(`Viewing profile: ${name}`); }
+function suspendUser(name) { showToast(`User suspended: ${name}`); }
+
+renderUsers(users);
+</script>
+</body>
+</html>

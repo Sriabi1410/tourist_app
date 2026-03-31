@@ -55,6 +55,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final success = await auth.verifyOtp(_otpValue);
     if (success && mounted) {
       Navigator.pushReplacementNamed(context, AppRoutes.home);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(auth.errorMessage.isNotEmpty ? auth.errorMessage : 'OTP verification failed.')),
+      );
     }
   }
 

@@ -1,6 +1,20 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 
 class AppProvider extends ChangeNotifier {
+  AppProvider() {
+    Connectivity().onConnectivityChanged.listen((event) {
+      if (event is ConnectivityResult) {
+        _isOnline = event != ConnectivityResult.none;
+      } else if (event is List<ConnectivityResult>) {
+        _isOnline = event.any((result) => result != ConnectivityResult.none);
+      } else {
+        _isOnline = true;
+      }
+      notifyListeners();
+    });
+  }
+
   String _selectedLanguage = 'English';
   bool _isOnline = true;
   bool _hasCompletedOnboarding = false;

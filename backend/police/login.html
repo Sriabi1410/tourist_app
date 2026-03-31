@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SafeTravel Police Portal — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #06080f; --bg2: #0a0e18; --surface: #111728; --surface2: #172038;
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.1);
+  --text: #e8edf5; --text2: #7a92b0; --text3: #3d5070;
+  --police: #1a3a6b; --police-light: #2155a3; --police-glow: rgba(33,85,163,0.3);
+  --gold: #d4a017; --gold-light: #f0c040; --gold-glow: rgba(212,160,23,0.2);
+  --red: #dc2626; --green: #059669; --amber: #d97706;
+  --font: 'DM Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+
+/* Left - Police branding */
+.left-panel {
+  background: linear-gradient(160deg, #0a0f1e 0%, #0d1630 50%, #0a1428 100%);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+}
+/* Badge background pattern */
+.left-panel::before {
+  content: '🚔';
+  position: absolute;
+  font-size: 320px;
+  opacity: 0.03;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+/* Glow */
+.left-panel::after {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, var(--police-glow) 0%, transparent 70%);
+  top: 40%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Police badge */
+.badge-wrap {
+  position: relative;
+  margin-bottom: 32px;
+  z-index: 1;
+}
+.police-badge {
+  width: 110px; height: 110px;
+  background: linear-gradient(145deg, #1e3a6b, #2a5299);
+  border: 3px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  box-shadow: 0 0 0 6px rgba(212,160,23,0.15), 0 0 40px var(--police-glow), inset 0 1px 0 rgba(255,255,255,0.1);
+  animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%,100% { box-shadow: 0 0 0 6px rgba(212,160,23,0.15), 0 0 40px var(--police-glow); }
+  50% { box-shadow: 0 0 0 10px rgba(212,160,23,0.08), 0 0 60px var(--police-glow); }
+}
+.badge-stars {
+  position: absolute;
+  bottom: -4px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 3px;
+}
+.badge-stars span { font-size: 12px; }
+
+.dept-name {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+  z-index: 1;
+}
+.portal-title {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  text-align: center;
+  z-index: 1;
+  line-height: 1.2;
+}
+.portal-sub {
+  color: var(--text2);
+  text-align: center;
+  font-size: 14px;
+  margin-top: 10px;
+  z-index: 1;
+  line-height: 1.6;
+}
+
+/* Emergency numbers */
+.emergency-strip {
+  margin-top: 40px;
+  background: rgba(220,38,38,0.1);
+  border: 1px solid rgba(220,38,38,0.25);
+  border-radius: 14px;
+  padding: 16px 24px;
+  z-index: 1;
+  width: 100%;
+  max-width: 340px;
+}
+.strip-title { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #fca5a5; margin-bottom: 10px; }
+.strip-numbers { display: flex; gap: 20px; justify-content: center; }
+.strip-num { text-align: center; }
+.strip-num-val { font-size: 22px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--text); }
+.strip-num-label { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* Features */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 28px;
+  z-index: 1;
+  width: 100%;
+  max-width: 340px;
+}
+.feat-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.feat-icon { font-size: 18px; }
+.feat-text { font-size: 12px; color: var(--text2); font-weight: 500; }
+
+/* Right - Form */
+.right-panel { display: flex; align-items: center; justify-content: center; padding: 60px 80px; }
+.login-box { width: 100%; max-width: 380px; }
+
+.login-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--police-glow);
+  border: 1px solid rgba(33,85,163,0.3);
+  color: #93c5fd;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 22px;
+}
+.login-title { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+.login-sub { color: var(--text2); font-size: 14px; margin-bottom: 30px; }
+
+.officer-select {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.officer-select:hover { border-color: rgba(33,85,163,0.5); }
+.officer-badge {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--police), var(--police-light));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.officer-info { flex: 1; }
+.officer-name { font-size: 14px; font-weight: 600; }
+.officer-rank { font-size: 12px; color: var(--text3); }
+.officer-change { font-size: 12px; color: #60a5fa; align-self: center; }
+
+.form-group { margin-bottom: 18px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 7px; }
+.form-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text); padding: 12px 16px; border-radius: 12px;
+  font-size: 14px; font-family: var(--font); transition: all 0.2s;
+}
+.form-input:focus { outline: none; border-color: var(--police-light); box-shadow: 0 0 0 3px var(--police-glow); }
+.form-input::placeholder { color: var(--text3); }
+
+.pw-wrap { position: relative; }
+.pw-wrap .form-input { padding-right: 44px; }
+.pw-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text3); cursor: pointer; font-size: 15px; }
+
+.btn-login {
+  width: 100%; background: linear-gradient(135deg, var(--police), var(--police-light));
+  color: #fff; border: none; padding: 13px; border-radius: 12px;
+  font-size: 15px; font-weight: 700; font-family: var(--font); cursor: pointer;
+  transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 20px var(--police-glow);
+}
+.btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 28px var(--police-glow); }
+
+.divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--text3); font-size: 12px; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.alt-link {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; font-size: 13px; font-weight: 600; color: var(--text2);
+  text-decoration: none; transition: all 0.15s;
+}
+.alt-link:hover { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+
+.error-msg {
+  background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3);
+  color: #fca5a5; padding: 10px 14px; border-radius: 10px; font-size: 13px;
+  margin-bottom: 14px; display: none;
+}
+.error-msg.show { display: block; }
+</style>
+</head>
+<body>
+<!-- Left -->
+<div class="left-panel">
+  <div class="badge-wrap">
+    <div class="police-badge">🚔</div>
+    <div class="badge-stars"><span>⭐</span><span>⭐</span><span>⭐</span></div>
+  </div>
+  <div class="dept-name">Law Enforcement</div>
+  <div class="portal-title">Police<br/>Command Portal</div>
+  <div class="portal-sub">SafeTravel Emergency Response<br/>for Law Enforcement Officers</div>
+
+  <div class="emergency-strip">
+    <div class="strip-title">🔴 Emergency Dispatch Numbers</div>
+    <div class="strip-numbers">
+      <div class="strip-num">
+        <div class="strip-num-val">100</div>
+        <div class="strip-num-label">Police</div>
+      </div>
+      <div class="strip-num">
+        <div class="strip-num-val">108</div>
+        <div class="strip-num-label">Ambulance</div>
+      </div>
+      <div class="strip-num">
+        <div class="strip-num-val">112</div>
+        <div class="strip-num-label">National</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feat-item"><span class="feat-icon">📡</span><span class="feat-text">Live SOS Feed</span></div>
+    <div class="feat-item"><span class="feat-icon">🗺️</span><span class="feat-text">Tourist Tracking</span></div>
+    <div class="feat-item"><span class="feat-icon">📋</span><span class="feat-text">Incident Reports</span></div>
+    <div class="feat-item"><span class="feat-icon">📞</span><span class="feat-text">Direct Contact</span></div>
+  </div>
+</div>
+
+<!-- Right -->
+<div class="right-panel">
+  <div class="login-box">
+    <div class="login-tag">🚔 Police Access</div>
+    <div class="login-title">Officer Sign In</div>
+    <div class="login-sub">Access your emergency response dashboard</div>
+
+    <!-- Quick officer select -->
+    <div class="officer-select">
+      <div class="officer-badge">👮</div>
+      <div class="officer-info">
+        <div class="officer-name">Inspector Rajesh Kumar</div>
+        <div class="officer-rank">Inspector · Badge #4721 · South Division</div>
+      </div>
+      <div class="officer-change">Switch ▾</div>
+    </div>
+
+    <div class="error-msg" id="errorMsg">Invalid credentials. Access denied.</div>
+
+    <div class="form-group">
+      <label class="form-label">Badge Number / Officer ID</label>
+      <input id="badgeInput" class="form-input" type="text" placeholder="e.g. 4721 or officer@police.gov.in"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="pw-wrap">
+        <input id="passInput" class="form-input" type="password" placeholder="••••••••"/>
+        <button class="pw-toggle" onclick="togglePW()">👁</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Station / Division</label>
+      <select id="stationSelect" class="form-input">
+        <option>South Division HQ</option>
+        <option>North Division HQ</option>
+        <option>East Division HQ</option>
+        <option>West Division HQ</option>
+        <option>Airport Police Station</option>
+        <option>Traffic Control Unit</option>
+      </select>
+    </div>
+
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">
+      <span id="btnTxt">🚔 Access Police Dashboard</span>
+    </button>
+
+    <div class="divider">or</div>
+    <a href="../admin/login.html" class="alt-link">🛡️ Switch to Admin Portal</a>
+
+    <div style="text-align:center;margin-top:24px;font-size:11px;color:var(--text3)">
+      This system is for authorized law enforcement only.<br/>All access is logged and monitored.
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePW() {
+  const p = document.getElementById('passInput');
+  p.type = p.type === 'password' ? 'text' : 'password';
+}
+
+function doLogin() {
+  const badge = document.getElementById('badgeInput').value;
+  const pass = document.getElementById('passInput').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('errorMsg');
+
+  if (!badge || !pass) {
+    err.classList.add('show');
+    err.textContent = 'Please enter your badge number and password.';
+    return;
+  }
+  err.classList.remove('show');
+  btn.innerHTML = '<span id="btnTxt">Verifying credentials...</span>';
+  btn.style.opacity = '0.7';
+
+  setTimeout(() => {
+    if (pass.length >= 4) {
+      window.location.href = 'index.html';
+    } else {
+      btn.innerHTML = '<span id="btnTxt">🚔 Access Police Dashboard</span>';
+      btn.style.opacity = '1';
+      err.classList.add('show');
+    }
+  }, 1400);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+</script>
+</body>
+</html>

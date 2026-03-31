@@ -16,6 +16,39 @@ class LiveLocationScreen extends StatefulWidget {
 class _LiveLocationScreenState extends State<LiveLocationScreen> {
   int _selectedDuration = 1;
   bool _isSharing = false;
+  String? _shareLink;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LocationProvider>().refreshLocation();
+    });
+  }
+
+  Future<void> _toggleShare() async {
+    if (_isSharing) {
+      setState(() {
+        _isSharing = false;
+        _shareLink = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Location sharing stopped.')));
+      return;
+    }
+
+    final provider = context.read<LocationProvider>();
+    final duration = _selectedDuration == 0 ? 15 : _selectedDuration == 1 ? 60 : _selectedDuration == 2 ? 240 : 0;
+    final shareLink = await provider.shareLiveLocation(durationMinutes: duration == 0 ? 60 : duration);
+    if (shareLink != null) {
+      setState(() {
+        _isSharing = true;
+        _shareLink = shareLink;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Live location shared: $shareLink')));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to start live sharing.')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,13 +172,28 @@ class _LiveLocationScreenState extends State<LiveLocationScreen> {
               ),
             ),
             const SizedBox(height: 30),
+            if (_shareLink != null)
+              FadeInUp(
+                delay: const Duration(milliseconds: 380),
+                child: GlassCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Share Link', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      SelectableText(_shareLink!, style: const TextStyle(color: AppColors.info, fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ),
+            const SizedBox(height: 14),
             FadeInUp(
               delay: const Duration(milliseconds: 400),
               child: GradientButton(
                 text: _isSharing ? 'Stop Sharing' : 'Start Sharing Location',
                 gradient: _isSharing ? AppColors.sosGradient : AppColors.primaryGradient,
                 icon: _isSharing ? Icons.stop_rounded : Icons.share_location_rounded,
-                onPressed: () => setState(() => _isSharing = !_isSharing),
+                onPressed: _toggleShare,
               ),
             ),
             const SizedBox(height: 30),

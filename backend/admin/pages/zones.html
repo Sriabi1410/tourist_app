@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Safety Zones — SafeTravel Admin</title>
+<link rel="stylesheet" href="../css/design-system.css"/>
+<style>
+.zone-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:18px; margin-bottom:12px; transition:all 0.2s; position:relative; overflow:hidden; }
+.zone-card:hover { border-color:var(--border2); transform:translateY(-1px); }
+.zone-card.danger::before { content:''; position:absolute; left:0;top:0;bottom:0; width:4px; background:var(--red); border-radius:18px 0 0 18px; }
+.zone-card.caution::before { content:''; position:absolute; left:0;top:0;bottom:0; width:4px; background:var(--amber); border-radius:18px 0 0 18px; }
+.zone-card.safe::before { content:''; position:absolute; left:0;top:0;bottom:0; width:4px; background:var(--green); border-radius:18px 0 0 18px; }
+.zone-map { height:320px; background:var(--bg3); border-radius:var(--radius-lg); position:relative; overflow:hidden; border:1px solid var(--border); }
+.zone-circle { position:absolute; border-radius:50%; border:2px solid; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; }
+.zone-circle:hover { transform:scale(1.05); }
+.zone-label { font-size:9px; font-weight:700; text-align:center; margin-top:2px; }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)">🛡️</div>
+      <div><div class="logo-text">SafeTravel</div><div class="logo-sub">Admin Portal</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a class="nav-item" href="live-tracking.html"><span class="nav-icon">📍</span> Live Tracking</a>
+      <a class="nav-item" href="sos-alerts.html"><span class="nav-icon">🆘</span> SOS Alerts</a>
+      <div class="nav-section-label">Management</div>
+      <a class="nav-item" href="users.html"><span class="nav-icon">👥</span> Users</a>
+      <a class="nav-item" href="alert-management.html"><span class="nav-icon">📢</span> Broadcast Alerts</a>
+      <a class="nav-item" href="crime-data.html"><span class="nav-icon">⚠️</span> Crime Data</a>
+      <div class="nav-section-label">Intelligence</div>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+      <a class="nav-item active" href="zones.html"><span class="nav-icon">🗺️</span> Safety Zones</a>
+      <div class="nav-section-label">System</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+      <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff">A</div>
+        <div><div class="user-name">Admin User</div><div class="user-role">Super Administrator</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Safety Zones</div>
+        <span class="topbar-subtitle">Manage geographic safety areas and risk levels</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadZones()">↻ Refresh</button>
+        <button class="btn btn-primary btn-sm" onclick="openModal('addZoneModal')">+ Add Zone</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- Stats -->
+      <div class="stats-grid mb-6" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card blue"><div class="stat-icon blue">🗺️</div><div class="stat-value" style="color:var(--accent)" id="totalZones">—</div><div class="stat-label">Total Zones</div></div>
+        <div class="stat-card red"><div class="stat-icon red">🔴</div><div class="stat-value text-red" id="dangerZones">—</div><div class="stat-label">Danger Zones</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">🟡</div><div class="stat-value" style="color:var(--amber)" id="cautionZones">—</div><div class="stat-label">Caution Zones</div></div>
+        <div class="stat-card green"><div class="stat-icon green">🟢</div><div class="stat-value text-green" id="safeZones">—</div><div class="stat-label">Safe Zones</div></div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Zone map visual -->
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Zone Map Overlay</div><div class="card-subtitle">Geographic safety zones</div></div>
+            <div class="live-dot">LIVE</div>
+          </div>
+          <div class="zone-map">
+            <div class="map-grid"></div>
+            <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.2" viewBox="0 0 600 320">
+              <line x1="100" y1="0" x2="100" y2="320" stroke="#334155" stroke-width="12"/>
+              <line x1="0" y1="140" x2="600" y2="140" stroke="#334155" stroke-width="12"/>
+              <line x1="0" y1="230" x2="600" y2="230" stroke="#334155" stroke-width="8"/>
+              <line x1="380" y1="0" x2="380" y2="320" stroke="#334155" stroke-width="8"/>
+            </svg>
+            <!-- Zone circles -->
+            <div class="zone-circle" style="left:35%;top:35%;width:90px;height:90px;border-color:rgba(239,68,68,0.6);background:rgba(239,68,68,0.1);transform:translate(-50%,-50%)" title="Central Market — DANGER" onclick="highlightZone('Central Market')">
+              <div style="text-align:center"><div style="font-size:16px">⚠️</div><div style="font-size:8px;color:#fca5a5;font-weight:700">DANGER</div></div>
+            </div>
+            <div class="zone-circle" style="left:62%;top:55%;width:70px;height:70px;border-color:rgba(245,158,11,0.6);background:rgba(245,158,11,0.08);transform:translate(-50%,-50%)" title="MG Road — CAUTION" onclick="highlightZone('MG Road')">
+              <div style="text-align:center"><div style="font-size:14px">⚡</div><div style="font-size:8px;color:#fcd34d;font-weight:700">CAUTION</div></div>
+            </div>
+            <div class="zone-circle" style="left:78%;top:30%;width:60px;height:60px;border-color:rgba(16,185,129,0.6);background:rgba(16,185,129,0.08);transform:translate(-50%,-50%)" title="Airport — SAFE" onclick="highlightZone('Airport')">
+              <div style="text-align:center"><div style="font-size:14px">✅</div><div style="font-size:8px;color:#6ee7b7;font-weight:700">SAFE</div></div>
+            </div>
+            <div class="zone-circle" style="left:22%;top:68%;width:55px;height:55px;border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.07);transform:translate(-50%,-50%)" title="Bus Stand — CAUTION" onclick="highlightZone('Bus Stand')">
+              <div style="text-align:center"><div style="font-size:12px">⚡</div><div style="font-size:7px;color:#fcd34d;font-weight:700">CAUTION</div></div>
+            </div>
+            <div style="position:absolute;bottom:10px;left:10px;background:rgba(8,12,20,0.9);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:10px;display:flex;gap:10px">
+              <span style="color:#fca5a5">🔴 Danger</span>
+              <span style="color:#fcd34d">🟡 Caution</span>
+              <span style="color:#6ee7b7">🟢 Safe</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone list -->
+        <div>
+          <div id="zonesList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Zone Modal -->
+<div class="modal-overlay" id="addZoneModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🗺️ Add Safety Zone</div>
+      <button class="modal-close" onclick="closeModal('addZoneModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="input-group"><label class="input-label">Zone Name</label><input class="input" id="zName" placeholder="e.g. Koramangala Market"/></div>
+      <div class="input-group"><label class="input-label">Risk Level</label>
+        <select class="input" id="zRisk">
+          <option value="danger">🔴 DANGER — High Risk Area</option>
+          <option value="caution">🟡 CAUTION — Exercise Care</option>
+          <option value="safe">🟢 SAFE — Tourist Friendly</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <div class="input-group"><label class="input-label">Latitude</label><input class="input" id="zLat" placeholder="12.9716"/></div>
+        <div class="input-group"><label class="input-label">Longitude</label><input class="input" id="zLng" placeholder="77.5946"/></div>
+      </div>
+      <div class="input-group"><label class="input-label">Description</label><textarea class="input" id="zDesc" rows="2" placeholder="Describe the area and safety concerns..."></textarea></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" style="flex:1" onclick="closeModal('addZoneModal')">Cancel</button>
+        <button class="btn btn-primary" style="flex:1" onclick="addZone()">Add Zone</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+let zones = [
+  { id:1, name:'Central Market', risk:'danger', incidents:24, tourists:120, lat:'12.9716', lng:'77.5946', desc:'High pickpocket activity. Tourist caution advised.' },
+  { id:2, name:'MG Road Junction', risk:'caution', incidents:12, tourists:340, lat:'12.9741', lng:'77.6101', desc:'Moderate risk. Road crossing and traffic hazards.' },
+  { id:3, name:'KIA Airport', risk:'safe', incidents:3, tourists:890, lat:'13.1979', lng:'77.7063', desc:'Low risk. Security presence high.' },
+  { id:4, name:'Majestic Bus Stand', risk:'caution', incidents:9, tourists:210, lat:'12.9771', lng:'77.5713', desc:'Busy area. Watch for scammers and pickpockets.' },
+  { id:5, name:'Indiranagar', risk:'safe', incidents:2, tourists:450, lat:'12.9716', lng:'77.6408', desc:'Trendy area. Generally safe for tourists.' },
+  { id:6, name:'Brigade Road', risk:'safe', incidents:4, tourists:620, lat:'12.9716', lng:'77.6104', desc:'Shopping area. Safe during day, moderate at night.' },
+];
+
+function loadZones() {
+  document.getElementById('totalZones').textContent = zones.length;
+  document.getElementById('dangerZones').textContent = zones.filter(z=>z.risk==='danger').length;
+  document.getElementById('cautionZones').textContent = zones.filter(z=>z.risk==='caution').length;
+  document.getElementById('safeZones').textContent = zones.filter(z=>z.risk==='safe').length;
+  renderZones();
+}
+
+function renderZones() {
+  document.getElementById('zonesList').innerHTML = zones.map(z => `
+    <div class="zone-card ${z.risk}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
+        <div>
+          <div style="font-weight:700;font-size:14px;color:var(--text)">${z.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono)">${z.lat}, ${z.lng}</div>
+        </div>
+        <span class="badge ${z.risk==='danger'?'red':z.risk==='caution'?'amber':'green'}">${z.risk.toUpperCase()}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">${z.desc}</div>
+      <div style="display:flex;gap:16px;font-size:11px;color:var(--text3);margin-bottom:10px">
+        <span>⚠️ ${z.incidents} incidents</span>
+        <span>👥 ${z.tourists} tourists</span>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="editZone(${z.id})">✏️ Edit</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.open('https://maps.google.com/?q=${z.lat},${z.lng}','_blank')">📍 View Map</button>
+        <button class="btn btn-ghost btn-sm" onclick="alertZone('${z.name}')">📢 Alert</button>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;color:var(--red)" onclick="deleteZone(${z.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function addZone() {
+  const name = document.getElementById('zName').value.trim();
+  const risk = document.getElementById('zRisk').value;
+  const lat = document.getElementById('zLat').value;
+  const lng = document.getElementById('zLng').value;
+  const desc = document.getElementById('zDesc').value;
+  if (!name) { showToast('Please enter a zone name','error'); return; }
+  zones.unshift({ id:Date.now(), name, risk, incidents:0, tourists:0, lat:lat||'12.9716', lng:lng||'77.5946', desc });
+  closeModal('addZoneModal');
+  loadZones();
+  document.getElementById('zName').value = ''; document.getElementById('zDesc').value = '';
+  showToast(`Zone "${name}" added successfully`, 'success');
+}
+
+function deleteZone(id) { zones = zones.filter(z=>z.id!==id); loadZones(); showToast('Zone removed','info'); }
+function editZone(id) { showToast('Edit zone opened','info'); }
+function alertZone(name) { showToast(`Safety alert sent for zone: ${name}`,'success'); }
+function highlightZone(name) { showToast(`Zone: ${name}`,'info'); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function showToast(msg,type='success') {
+  const c={success:'var(--green)',error:'var(--red)',info:'var(--accent)'};
+  const i={success:'✓',error:'✕',info:'ℹ'};
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<span style="color:${c[type]}">${i[type]}</span> <span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+loadZones();
+</script>
+</body>
+</html>

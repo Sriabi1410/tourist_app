@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Police Command Dashboard — SafeTravel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #06080f; --bg2: #090d18; --bg3: #0d1220;
+  --surface: #101828; --surface2: #162035;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+  --text: #e8edf5; --text2: #7a92b0; --text3: #3d5070;
+  --police: #1e3a6b; --police-light: #2563b0; --police-glow: rgba(37,99,176,0.2);
+  --gold: #d4a017; --red: #dc2626; --green: #059669; --amber: #d97706;
+  --cyan: #0891b2; --purple: #7c3aed;
+  --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+  --sidebar-w: 260px; --radius: 12px; --radius-lg: 18px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-w); background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+}
+.sidebar-logo {
+  padding: 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.logo-badge {
+  width: 44px; height: 44px;
+  background: linear-gradient(145deg, var(--police), var(--police-light));
+  border: 1.5px solid var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 16px var(--police-glow);
+  flex-shrink: 0;
+}
+.logo-text { font-weight: 800; font-size: 15px; letter-spacing: -0.3px; }
+.logo-sub { font-size: 10px; color: var(--gold); font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; }
+
+.sidebar-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
+.nav-section { font-size: 9px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; padding: 14px 18px 5px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 18px; color: var(--text2); font-size: 13.5px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent;
+  text-decoration: none;
+}
+.nav-item:hover { background: var(--surface); color: var(--text); }
+.nav-item.active { background: var(--surface); color: var(--text); border-left-color: var(--gold); }
+.nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-badge { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 20px; }
+.nav-badge.amber { background: var(--amber); }
+
+.sidebar-officer {
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+}
+.officer-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.officer-av {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--police), var(--police-light));
+  border: 1.5px solid var(--gold);
+  display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+}
+.officer-nm { font-size: 13px; font-weight: 600; }
+.officer-rank { font-size: 10px; color: var(--gold); }
+
+/* Main */
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+.topbar {
+  height: 62px; background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 24px; gap: 14px;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-left { flex: 1; }
+.topbar-title { font-size: 17px; font-weight: 800; }
+.topbar-sub { font-size: 11px; color: var(--text3); }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+.live-indicator {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; color: var(--red);
+  background: rgba(220,38,38,0.1);
+  border: 1px solid rgba(220,38,38,0.25);
+  padding: 5px 10px; border-radius: 20px;
+}
+.live-dot {
+  width: 7px; height: 7px; background: var(--red); border-radius: 50%;
+  animation: blink 1.4s infinite;
+}
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+
+.content { padding: 24px; }
+
+/* Alert strip */
+.alert-strip {
+  background: linear-gradient(135deg, rgba(220,38,38,0.12), rgba(220,38,38,0.04));
+  border: 1px solid rgba(220,38,38,0.3);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px;
+  animation: slideIn 0.4s ease;
+}
+@keyframes slideIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform:none; } }
+.alert-icon {
+  width: 40px; height: 40px;
+  background: rgba(220,38,38,0.15);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)} 70%{box-shadow:0 0 0 10px rgba(220,38,38,0)} }
+
+/* Stats */
+.stats-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin-bottom: 20px; }
+.stat {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px;
+  position: relative; overflow: hidden; transition: border-color 0.2s;
+}
+.stat:hover { border-color: var(--border2); }
+.stat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.stat-ico { font-size: 20px; }
+.stat-val { font-size: 26px; font-weight: 800; letter-spacing: -1px; }
+.stat-lbl { font-size: 11px; color: var(--text3); font-weight: 500; }
+
+/* Grid */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.grid3 { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+/* Cards */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 18px;
+}
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-title { font-size: 14px; font-weight: 700; }
+.card-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* Incident list */
+.incident { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.incident:last-child { border-bottom: none; padding-bottom: 0; }
+.inc-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+}
+.inc-body { flex: 1; }
+.inc-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.inc-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.inc-time { font-size: 11px; color: var(--text3); white-space: nowrap; }
+
+/* Dispatch queue */
+.dispatch-item {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px; margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+.dispatch-item.urgent { border-color: rgba(220,38,38,0.35); }
+.dispatch-item.medium { border-color: rgba(217,119,6,0.3); }
+.di-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.di-name { font-weight: 700; font-size: 14px; }
+.di-coords { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 10px; }
+.di-actions { display: flex; gap: 8px; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius); font-size: 12px; font-weight: 700; font-family: var(--font); cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; }
+.btn-police { background: linear-gradient(135deg, var(--police), var(--police-light)); color: #fff; box-shadow: 0 2px 8px var(--police-glow); }
+.btn-police:hover { transform: translateY(-1px); }
+.btn-red { background: rgba(220,38,38,0.15); color: #fca5a5; border: 1px solid rgba(220,38,38,0.25); }
+.btn-red:hover { background: rgba(220,38,38,0.25); }
+.btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+.btn-green { background: rgba(5,150,105,0.15); color: #6ee7b7; border: 1px solid rgba(5,150,105,0.25); }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+
+/* Badge */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.badge-red { background: rgba(220,38,38,0.12); color: #fca5a5; }
+.badge-red::before { background: var(--red); }
+.badge-amber { background: rgba(217,119,6,0.12); color: #fcd34d; }
+.badge-amber::before { background: var(--amber); }
+.badge-green { background: rgba(5,150,105,0.12); color: #6ee7b7; }
+.badge-green::before { background: var(--green); }
+.badge-blue { background: rgba(37,99,176,0.15); color: #93c5fd; }
+.badge-blue::before { background: var(--police-light); }
+
+/* Map */
+.map-box {
+  height: 280px; background: var(--bg3); border-radius: 14px;
+  position: relative; overflow: hidden; border: 1px solid var(--border);
+}
+.map-grid-bg {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+.map-pin {
+  position: absolute; transform: translate(-50%, -100%);
+  cursor: pointer; transition: transform 0.2s;
+}
+.map-pin:hover { transform: translate(-50%, -100%) scale(1.2); }
+.pin-head {
+  width: 30px; height: 30px;
+  border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.pin-label {
+  font-size: 8px; font-weight: 700; background: var(--surface2);
+  border: 1px solid var(--border); padding: 2px 4px; border-radius: 4px;
+  margin-top: 3px; color: var(--text2); white-space: nowrap;
+}
+.pin-inner { transform: rotate(45deg); font-size: 13px; }
+
+/* Toast */
+.toasts { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 11px 16px;
+  display: flex; align-items: center; gap: 8px; font-size: 13px;
+  animation: tIn 0.3s ease; min-width: 240px;
+}
+@keyframes tIn { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:none} }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">🚔</div>
+    <div>
+      <div class="logo-text">Police Portal</div>
+      <div class="logo-sub">SafeTravel LEO</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Dispatch</div>
+    <a class="nav-item active" href="index.html"><span class="nav-icon">⊞</span> Command Center</a>
+    <a class="nav-item" href="pages/sos-feed.html"><span class="nav-icon">🆘</span> SOS Feed<span class="nav-badge">3</span></a>
+    <a class="nav-item" href="pages/map.html"><span class="nav-icon">📍</span> Live Map</a>
+    <a class="nav-item" href="pages/dispatch.html"><span class="nav-icon">🚔</span> Dispatch Units<span class="nav-badge amber">2</span></a>
+
+    <div class="nav-section">Incidents</div>
+    <a class="nav-item" href="pages/incidents.html"><span class="nav-icon">📋</span> Incident Log</a>
+    <a class="nav-item" href="pages/crime-reports.html"><span class="nav-icon">⚠️</span> Crime Reports</a>
+    <a class="nav-item" href="pages/tourists.html"><span class="nav-icon">👥</span> Tourists</a>
+    <a class="nav-item" href="pages/missing.html"><span class="nav-icon">🔍</span> Missing Persons</a>
+
+    <div class="nav-section">Station</div>
+    <a class="nav-item" href="pages/officers.html"><span class="nav-icon">👮</span> Officers</a>
+    <a class="nav-item" href="pages/reports.html"><span class="nav-icon">📊</span> Reports</a>
+    <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> Logout</a>
+  </nav>
+
+  <div class="sidebar-officer">
+    <div class="officer-card">
+      <div class="officer-av">👮</div>
+      <div>
+        <div class="officer-nm">Insp. Rajesh Kumar</div>
+        <div class="officer-rank">Badge #4721 · South Div.</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Command Center</div>
+      <div class="topbar-sub">South Division · Bengaluru City Police</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="live-indicator"><div class="live-dot"></div> LIVE</div>
+      <button class="btn btn-ghost" style="font-size:12px" onclick="toast('Dashboard refreshed','info')">↻ Refresh</button>
+      <button class="btn btn-red" style="font-size:12px" onclick="openDispatch()">🚔 Dispatch Unit</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Alert Strip -->
+    <div class="alert-strip">
+      <div class="alert-icon">🆘</div>
+      <div style="flex:1">
+        <div style="font-weight:700;color:#fca5a5;font-size:14px">3 Active SOS Alerts in Your Jurisdiction</div>
+        <div style="font-size:12px;color:var(--text3)">Rahul S. (Medical, Koramangala) · Priya M. (Accident, MG Road) — Immediate action required</div>
+      </div>
+      <a href="pages/sos-feed.html" class="btn btn-red">View All →</a>
+      <button class="btn btn-ghost btn-sm" onclick="this.closest('.alert-strip').remove()">✕</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat" style="border-top:2px solid var(--red)">
+        <div class="stat-top"><span class="stat-ico">🆘</span><span class="badge badge-red">URGENT</span></div>
+        <div class="stat-val" style="color:var(--red)">3</div>
+        <div class="stat-lbl">Active SOS</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--amber)">
+        <div class="stat-top"><span class="stat-ico">🚔</span></div>
+        <div class="stat-val" style="color:var(--amber)">2</div>
+        <div class="stat-lbl">Units Dispatched</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--police-light)">
+        <div class="stat-top"><span class="stat-ico">👥</span></div>
+        <div class="stat-val" style="color:#93c5fd">247</div>
+        <div class="stat-lbl">Tourists Online</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--green)">
+        <div class="stat-top"><span class="stat-ico">✓</span></div>
+        <div class="stat-val" style="color:var(--green)">14</div>
+        <div class="stat-lbl">Resolved Today</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--gold)">
+        <div class="stat-top"><span class="stat-ico">⏱</span></div>
+        <div class="stat-val" style="color:var(--gold)">3.8m</div>
+        <div class="stat-lbl">Response Time</div>
+      </div>
+    </div>
+
+    <!-- Map + Dispatch -->
+    <div class="grid3">
+      <!-- Map -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Jurisdiction Live Map</div>
+            <div class="card-sub">South Division coverage area</div>
+          </div>
+          <a href="pages/map.html" class="btn btn-ghost btn-sm">Full Map →</a>
+        </div>
+        <div class="map-box">
+          <div class="map-grid-bg"></div>
+          <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.25" viewBox="0 0 560 280">
+            <line x1="90" y1="0" x2="90" y2="280" stroke="#1e3a6b" stroke-width="14"/>
+            <line x1="0" y1="110" x2="560" y2="110" stroke="#1e3a6b" stroke-width="14"/>
+            <line x1="0" y1="190" x2="560" y2="190" stroke="#1e3a6b" stroke-width="8"/>
+            <line x1="320" y1="0" x2="320" y2="280" stroke="#1e3a6b" stroke-width="8"/>
+          </svg>
+          <!-- Pins -->
+          <div class="map-pin" style="left:44%;top:52%">
+            <div class="pin-head" style="background:#dc2626"><div class="pin-inner">🆘</div></div>
+            <div class="pin-label" style="color:#fca5a5">Rahul S.</div>
+          </div>
+          <div class="map-pin" style="left:60%;top:65%">
+            <div class="pin-head" style="background:#d97706"><div class="pin-inner">🚗</div></div>
+            <div class="pin-label" style="color:#fcd34d">Priya M.</div>
+          </div>
+          <!-- Police units -->
+          <div class="map-pin" style="left:35%;top:40%">
+            <div class="pin-head" style="background:#1e3a6b;border:2px solid #d4a017"><div class="pin-inner">🚔</div></div>
+            <div class="pin-label" style="color:#93c5fd">Unit 07</div>
+          </div>
+          <div class="map-pin" style="left:70%;top:45%">
+            <div class="pin-head" style="background:#1e3a6b;border:2px solid #d4a017"><div class="pin-inner">🚔</div></div>
+            <div class="pin-label" style="color:#93c5fd">Unit 14</div>
+          </div>
+          <!-- Normal tourists -->
+          <div class="map-pin" style="left:25%;top:60%">
+            <div class="pin-head" style="background:#1e4060"><div class="pin-inner">👤</div></div>
+            <div class="pin-label">Tourist</div>
+          </div>
+          <div class="map-pin" style="left:80%;top:30%">
+            <div class="pin-head" style="background:#1e4060"><div class="pin-inner">👤</div></div>
+            <div class="pin-label">Tourist</div>
+          </div>
+          <!-- Legend -->
+          <div style="position:absolute;bottom:10px;left:10px;background:rgba(9,13,24,0.85);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:10px;display:flex;gap:10px">
+            <span style="color:#fca5a5">🔴 SOS</span>
+            <span style="color:#93c5fd">🔵 Police</span>
+            <span style="color:#6b7280">⚫ Tourist</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dispatch queue -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Dispatch Queue</div>
+            <div class="card-sub">Active response units</div>
+          </div>
+          <span class="badge badge-red">3 Pending</span>
+        </div>
+        <div id="dispatchList"></div>
+      </div>
+    </div>
+
+    <!-- Incidents + Tourist List -->
+    <div class="grid2">
+      <!-- Recent Incidents -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Recent Incidents</div>
+            <div class="card-sub">Today's log — South Division</div>
+          </div>
+          <a href="pages/incidents.html" class="btn btn-ghost btn-sm">Full Log →</a>
+        </div>
+        <div id="incidentList"></div>
+      </div>
+
+      <!-- Tourists needing attention -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Tourists — Attention Needed</div>
+            <div class="card-sub">SOS, missed check-in, flagged</div>
+          </div>
+          <a href="pages/tourists.html" class="btn btn-ghost btn-sm">All →</a>
+        </div>
+        <div id="touristList"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Dispatch Modal -->
+<div id="dispatchModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;width:90%;max-width:460px;animation:tIn 0.2s ease">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:800">🚔 Dispatch Unit</div>
+      <button onclick="closeDispatch()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Incident Type</label>
+        <select style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--radius);font-family:var(--font);font-size:13px">
+          <option>🆘 SOS — Medical Emergency</option>
+          <option>🚗 Road Accident</option>
+          <option>⚠️ Crime in Progress</option>
+          <option>🔍 Missing Tourist</option>
+          <option>👁 Welfare Check</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Assign Unit</label>
+        <select style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--radius);font-family:var(--font);font-size:13px">
+          <option>Unit 03 — Constable Raju (Available)</option>
+          <option>Unit 09 — HC Meera (Available)</option>
+          <option>Unit 12 — SI Prakash (Available)</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Location</label>
+        <input style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--radius);font-family:var(--font);font-size:13px" placeholder="12.9716° N, 77.5946° E — Koramangala"/>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Priority</label>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-red" style="flex:1" onclick="dispatch('HIGH')">🔴 HIGH</button>
+          <button class="btn" style="flex:1;background:rgba(217,119,6,0.15);color:#fcd34d;border:1px solid rgba(217,119,6,0.25)" onclick="dispatch('MED')">🟡 MEDIUM</button>
+          <button class="btn btn-ghost" style="flex:1" onclick="dispatch('LOW')">⚪ LOW</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+const dispatchData = [
+  { id:'SOS-2847', name:'Rahul Sharma', type:'Medical', status:'urgent', unit:'Unit 07', eta:'3 min', coords:'12.9716, 77.5946' },
+  { id:'SOS-2846', name:'Priya Mehta', type:'Accident', status:'medium', unit:'Unit 14', eta:'6 min', coords:'12.9741, 77.6101' },
+  { id:'SOS-2845', name:'John Doe', type:'Welfare Check', status:'medium', unit:'Pending', eta:'—', coords:'12.9600, 77.6200' },
+];
+
+const incidents = [
+  { icon:'🆘', title:'SOS — Rahul Sharma', meta:'Medical · Koramangala · Unit 07 dispatched', time:'2m', type:'red' },
+  { icon:'🚗', title:'Road Accident — MG Road', meta:'2 tourists involved · Unit 14 en route', time:'8m', type:'amber' },
+  { icon:'⚠️', title:'Pickpocket reported', meta:'Central Market · Tourist complaint', time:'32m', type:'amber' },
+  { icon:'✓', title:'SOS resolved — Sara K.', meta:'False alarm · Koramangala · Closed', time:'1h', type:'green' },
+  { icon:'🔍', title:'Missing person report', meta:'Airport area · Search ongoing', time:'2h', type:'blue' },
+];
+
+const tourists = [
+  { name:'Rahul Sharma', flag:'🇮🇳', status:'SOS', status_cls:'badge-red', detail:'Medical Emergency · Koramangala' },
+  { name:'Priya Mehta', flag:'🇮🇳', status:'Accident', status_cls:'badge-amber', detail:'Road accident · MG Road' },
+  { name:'John Doe', flag:'🇺🇸', status:'Missed Check-In', status_cls:'badge-amber', detail:'No response · Airport area' },
+  { name:'Yuki Tanaka', flag:'🇯🇵', status:'Online', status_cls:'badge-green', detail:'Indiranagar · Last seen 3m ago' },
+  { name:'Li Wei', flag:'🇨🇳', status:'Offline', status_cls:'badge-blue', detail:'Last known: Airport, 1h ago' },
+];
+
+function renderDispatch() {
+  document.getElementById('dispatchList').innerHTML = dispatchData.map(d => `
+    <div class="dispatch-item ${d.status}">
+      <div class="di-head">
+        <div class="di-name">${d.name}</div>
+        <span class="badge ${d.status === 'urgent' ? 'badge-red' : 'badge-amber'}">${d.type}</span>
+      </div>
+      <div class="di-coords">📍 ${d.coords}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--text3)">🚔 ${d.unit} · ETA: ${d.eta}</span>
+        <div class="di-actions">
+          <button class="btn btn-ghost btn-sm" onclick="callTourist('${d.name}')">📞 Call</button>
+          <button class="btn btn-police btn-sm" onclick="toast('Unit dispatched to ${d.name}','success')">Dispatch</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderIncidents() {
+  const colors = { red:'var(--red)', amber:'var(--amber)', green:'var(--green)', blue:'#60a5fa' };
+  document.getElementById('incidentList').innerHTML = incidents.map(i => `
+    <div class="incident">
+      <div class="inc-icon" style="background:${colors[i.type]}18">${i.icon}</div>
+      <div class="inc-body">
+        <div class="inc-title">${i.title}</div>
+        <div class="inc-meta">${i.meta}</div>
+      </div>
+      <div class="inc-time">${i.time} ago</div>
+    </div>
+  `).join('');
+}
+
+function renderTourists() {
+  document.getElementById('touristList').innerHTML = tourists.map(t => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:20px">${t.flag}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">${t.name}</div>
+        <div style="font-size:11px;color:var(--text3)">${t.detail}</div>
+      </div>
+      <span class="badge ${t.status_cls}">${t.status}</span>
+    </div>
+  `).join('');
+}
+
+function toast(msg, type='info') {
+  const c = { success:'var(--green)', error:'var(--red)', info:'var(--police-light)', warn:'var(--amber)' };
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<span style="color:${c[type]||c.info};font-size:14px">${type==='success'?'✓':type==='error'?'✕':'ℹ'}</span><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function openDispatch() { document.getElementById('dispatchModal').style.display = 'flex'; }
+function closeDispatch() { document.getElementById('dispatchModal').style.display = 'none'; }
+function dispatch(level) {
+  closeDispatch();
+  toast(`Unit dispatched — Priority ${level}`, 'success');
+}
+function callTourist(name) { toast(`Calling ${name}...`, 'info'); }
+
+// Live event simulation
+const liveEvents = [
+  { icon:'📍', msg:'Location update: Rahul S. — Koramangala (±4m)' },
+  { icon:'✓', msg:'Check-in received: Sara K. — Whitefield' },
+  { icon:'🚔', msg:'Unit 07 arrived at Koramangala' },
+];
+let evIdx = 0;
+setInterval(() => {
+  toast(`${liveEvents[evIdx%liveEvents.length].icon} ${liveEvents[evIdx%liveEvents.length].msg}`, 'info');
+  evIdx++;
+}, 12000);
+
+renderDispatch();
+renderIncidents();
+renderTourists();
+</script>
+</body>
+</html>

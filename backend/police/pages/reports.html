@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reports — Police Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#06080f;--bg2:#090d18;--bg3:#0d1220;--surface:#101828;--surface2:#162035;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8edf5;--text2:#7a92b0;--text3:#3d5070;--police:#1e3a6b;--police-light:#2563b0;--gold:#d4a017;--red:#dc2626;--green:#059669;--amber:#d97706;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--sidebar-w:260px;--radius:12px;--radius-lg:18px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.sidebar-logo{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.logo-badge{width:44px;height:44px;background:linear-gradient(145deg,var(--police),var(--police-light));border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.logo-text{font-weight:800;font-size:15px;}.logo-sub{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:.8px;text-transform:uppercase;}
+.sidebar-nav{flex:1;padding:10px 0;overflow-y:auto;}
+.nav-section{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:14px 18px 5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;color:var(--text2);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none;}
+.nav-item:hover{background:var(--surface);color:var(--text);}.nav-item.active{background:var(--surface);color:var(--text);border-left-color:var(--gold);}
+.nav-icon{font-size:15px;width:20px;text-align:center;}.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;}
+.sidebar-officer{padding:14px 18px;border-top:1px solid var(--border);}
+.officer-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.officer-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--police),var(--police-light));border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.officer-nm{font-size:13px;font-weight:600;}.officer-rank{font-size:10px;color:var(--gold);}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+.topbar{height:62px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:50;}
+.topbar-left{flex:1;}.topbar-title{font-size:17px;font-weight:800;}.topbar-sub{font-size:11px;color:var(--text3);}
+.content{padding:24px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-police{background:linear-gradient(135deg,var(--police),var(--police-light));color:#fff;}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.badge-red{background:rgba(220,38,38,.12);color:#fca5a5;}.badge-red::before{background:var(--red);}
+.badge-green{background:rgba(5,150,105,.12);color:#6ee7b7;}.badge-green::before{background:var(--green);}
+.badge-blue{background:rgba(37,99,176,.15);color:#93c5fd;}.badge-blue::before{background:var(--police-light);}
+.badge-gold{background:rgba(212,160,23,.15);color:var(--gold);}.badge-gold::before{background:var(--gold);}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;}
+.stat-val{font-size:26px;font-weight:800;letter-spacing:-1px;margin-top:8px;}
+.stat-lbl{font-size:11px;color:var(--text3);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:16px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-title{font-size:14px;font-weight:700;}.card-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;}
+.bar-g{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar{width:100%;border-radius:4px 4px 0 0;min-height:4px;transition:height .6s cubic-bezier(.34,1.56,.64,1);}
+.bar-lbl{font-size:9px;color:var(--text3);}
+.progress-bar{background:var(--bg3);border-radius:4px;height:5px;overflow:hidden;margin-top:5px;}
+.progress-fill{height:100%;border-radius:4px;transition:width .8s ease;}
+.kpi-box{background:var(--bg3);border-radius:12px;padding:14px;text-align:center;}
+.row-line{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.row-line:last-child{border-bottom:none;}
+.toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:13px;animation:tIn .3s ease;min-width:220px;}
+@keyframes tIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">🚔</div>
+    <div><div class="logo-text">Police Portal</div><div class="logo-sub">SafeTravel LEO</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Dispatch</div>
+    <a class="nav-item" href="../index.html"><span class="nav-icon">⊞</span> Command Center</a>
+    <a class="nav-item" href="sos-feed.html"><span class="nav-icon">🆘</span> SOS Feed<span class="nav-badge">3</span></a>
+    <a class="nav-item" href="map.html"><span class="nav-icon">📍</span> Live Map</a>
+    <a class="nav-item" href="dispatch.html"><span class="nav-icon">🚔</span> Dispatch Units</a>
+    <div class="nav-section">Incidents</div>
+    <a class="nav-item" href="incidents.html"><span class="nav-icon">📋</span> Incident Log</a>
+    <a class="nav-item" href="crime-reports.html"><span class="nav-icon">⚠️</span> Crime Reports</a>
+    <a class="nav-item" href="tourists.html"><span class="nav-icon">👥</span> Tourists</a>
+    <a class="nav-item" href="missing.html"><span class="nav-icon">🔍</span> Missing Persons</a>
+    <div class="nav-section">Station</div>
+    <a class="nav-item" href="officers.html"><span class="nav-icon">👮</span> Officers</a>
+    <a class="nav-item active" href="reports.html"><span class="nav-icon">📊</span> Reports</a>
+    <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Logout</a>
+  </nav>
+  <div class="sidebar-officer">
+    <div class="officer-card">
+      <div class="officer-av">👮</div>
+      <div><div class="officer-nm">Insp. Rajesh Kumar</div><div class="officer-rank">Badge #4721 · South Div.</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Police Reports</div>
+      <div class="topbar-sub">South Division performance analytics</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <select style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:var(--radius);font-family:var(--font);font-size:12px" onchange="loadData()">
+        <option>This Week</option><option selected>This Month</option><option>This Quarter</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="toast('Report exported','success')">⬇ Export PDF</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="stats-row">
+      <div class="stat" style="border-top:2px solid var(--red)">
+        <div style="font-size:18px">🆘</div><div class="stat-val" style="color:var(--red)">47</div><div class="stat-lbl">Total Responses</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--green)">
+        <div style="font-size:18px">✓</div><div class="stat-val" style="color:var(--green)">44</div><div class="stat-lbl">Resolved</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--gold)">
+        <div style="font-size:18px">⏱</div><div class="stat-val" style="color:var(--gold)">3.8m</div><div class="stat-lbl">Avg Response</div>
+      </div>
+      <div class="stat" style="border-top:2px solid var(--police-light)">
+        <div style="font-size:18px">📈</div><div class="stat-val" style="color:#93c5fd">93.6%</div><div class="stat-lbl">Resolution Rate</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <!-- Monthly incident chart -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head">
+          <div><div class="card-title">Monthly Incident Trend</div><div class="card-sub">South Division — 12 months</div></div>
+        </div>
+        <div class="bar-chart" id="monthChart"></div>
+        <div style="display:flex;justify-content:center;gap:14px;margin-top:10px;font-size:10px;color:var(--text3)">
+          <span>🔴 SOS</span><span>🟡 Crime</span><span>🔵 Accident</span>
+        </div>
+      </div>
+
+      <!-- Incident type breakdown -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head">
+          <div><div class="card-title">Incident Breakdown</div><div class="card-sub">By type this period</div></div>
+          <span class="badge badge-gold">47 Total</span>
+        </div>
+        <div id="typeBreakdown" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <!-- Response performance -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head">
+          <div><div class="card-title">Response Time Performance</div><div class="card-sub">By incident type</div></div>
+        </div>
+        <div id="responseTimes" style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px">
+          <div class="kpi-box"><div style="font-size:18px;font-weight:800;color:var(--green)">1.5m</div><div style="font-size:10px;color:var(--text3)">Fastest</div></div>
+          <div class="kpi-box"><div style="font-size:18px;font-weight:800;color:var(--gold)">3.8m</div><div style="font-size:10px;color:var(--text3)">Average</div></div>
+          <div class="kpi-box"><div style="font-size:18px;font-weight:800;color:var(--red)">12m</div><div style="font-size:10px;color:var(--text3)">Slowest</div></div>
+        </div>
+      </div>
+
+      <!-- Officer performance -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head">
+          <div><div class="card-title">Top Officers</div><div class="card-sub">Cases resolved this month</div></div>
+        </div>
+        <div id="officerPerf"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+<script>
+const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const monthData=[8,12,10,15,13,18,9,11,14,12,9,10];
+
+const typeData=[
+  {type:'SOS Medical',count:18,color:'var(--red)',icon:'🏥'},
+  {type:'Road Accident',count:12,color:'var(--amber)',icon:'🚗'},
+  {type:'Crime / Theft',count:9,color:'var(--police-light)',icon:'⚠️'},
+  {type:'Missing Person',count:5,color:'#8b5cf6',icon:'🔍'},
+  {type:'Harassment',count:3,color:'#06b6d4',icon:'🛡️'},
+];
+
+const responseData=[
+  {type:'SOS Medical',time:'2.4m',pct:24},
+  {type:'Road Accident',time:'3.8m',pct:38},
+  {type:'Crime',time:'5.2m',pct:52},
+  {type:'Missing',time:'12m',pct:100},
+];
+
+const topOfficers=[
+  {name:'HC Meera Nair',unit:'Unit 14',cases:15,badge:'#2918'},
+  {name:'Insp. Rajesh Kumar',unit:'CMD',cases:12,badge:'#4721'},
+  {name:'SI Prakash Rao',unit:'Unit 12',cases:11,badge:'#3756'},
+  {name:'Const. Anand Kumar',unit:'Unit 07',cases:8,badge:'#3421'},
+  {name:'HC Fatima Begum',unit:'Unit 09',cases:9,badge:'#4307'},
+];
+
+function loadData() {
+  const max=Math.max(...monthData);
+  document.getElementById('monthChart').innerHTML=monthData.map((v,i)=>`
+    <div class="bar-g">
+      <div class="bar" style="height:${Math.max((v/max)*96,4)}px;background:linear-gradient(to top,var(--police-light),var(--police-light)60)"></div>
+      <div class="bar-lbl">${months[i]}</div>
+    </div>`).join('');
+
+  const total=typeData.reduce((s,t)=>s+t.count,0);
+  document.getElementById('typeBreakdown').innerHTML=typeData.map(t=>`
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;color:var(--text2)">${t.icon} ${t.type}</span>
+        <span style="font-size:12px;font-weight:700;color:var(--text)">${t.count} <span style="color:var(--text3);font-weight:400">(${(t.count/total*100).toFixed(0)}%)</span></span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${(t.count/total*100).toFixed(0)}%;background:${t.color}"></div></div>
+    </div>`).join('');
+
+  document.getElementById('responseTimes').innerHTML=responseData.map(r=>`
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;color:var(--text2)">${r.type}</span>
+        <span style="font-size:12px;font-weight:700;color:var(--gold)">${r.time}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${r.pct}%;background:var(--gold)"></div></div>
+    </div>`).join('');
+
+  const maxC=Math.max(...topOfficers.map(o=>o.cases));
+  document.getElementById('officerPerf').innerHTML=topOfficers.map((o,i)=>`
+    <div class="row-line">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:22px;height:22px;border-radius:50%;background:${i===0?'var(--gold)':i===1?'rgba(255,255,255,.1)':i===2?'rgba(205,127,50,.2)':'var(--bg3)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${i===0?'var(--bg)':'var(--text3)'}">${i+1}</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${o.name}</div>
+          <div style="font-size:10px;color:var(--text3)">Badge ${o.badge} · ${o.unit}</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700;color:var(--text)">${o.cases}</div>
+        <div style="font-size:10px;color:var(--text3)">cases</div>
+      </div>
+    </div>`).join('');
+}
+
+function toast(msg,type='info'){
+  const c={success:'var(--green)',error:'var(--red)',info:'var(--police-light)'};
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span style="color:${c[type]}">${type==='success'?'✓':'ℹ'}</span> <span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+loadData();
+</script>
+</body>
+</html>
