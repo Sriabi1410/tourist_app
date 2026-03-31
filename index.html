@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Police Control Dashboard</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <i class="ph-fill ph-shield-check"></i>
+                <h2>POLICE CMD</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">
+                    <i class="ph ph-squares-four"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ph ph-warning-circle"></i>
+                    <span>Alerts</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ph ph-map-trifold"></i>
+                    <span>Map</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ph ph-gear"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="user-profile">
+                <!-- Using UI Avatars for mock profile picture -->
+                <img src="https://ui-avatars.com/api/?name=Officer+Smith&background=1e293b&color=fff" alt="User Avatar" class="avatar">
+                <div class="user-info">
+                    <p class="name">Officer Smith</p>
+                    <p class="role">Commander</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar glass-panel">
+                <div class="header-title">
+                    <h1>Police Control Dashboard</h1>
+                    <span class="subtitle">Tourist Safety & Emergency Assistance System</span>
+                </div>
+                <div class="header-actions">
+                    <div class="network-status online" id="network-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Online</span>
+                    </div>
+                    <div class="clock glass-panel-inner" id="live-clock">
+                        00:00:00
+                    </div>
+                    <button class="icon-btn notification-btn">
+                        <i class="ph ph-bell"></i>
+                        <span class="badge" id="notification-badge">0</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats Overview -->
+            <section class="stats-overview">
+                <div class="stat-card glass-panel">
+                    <div class="stat-icon total">
+                        <i class="ph ph-files"></i>
+                    </div>
+                    <div class="stat-details">
+                        <p class="stat-label">Total Alerts</p>
+                        <h3 class="stat-value" id="stat-total">0</h3>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-icon active">
+                        <i class="ph ph-warning"></i>
+                    </div>
+                    <div class="stat-details">
+                        <p class="stat-label">Active Cases</p>
+                        <h3 class="stat-value text-red" id="stat-active">0</h3>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <div class="stat-icon resolved">
+                        <i class="ph ph-check-circle"></i>
+                    </div>
+                    <div class="stat-details">
+                        <p class="stat-label">Resolved Cases</p>
+                        <h3 class="stat-value text-green" id="stat-resolved">0</h3>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Grid -->
+            <div class="content-grid">
+                <!-- Alerts Panel -->
+                <section class="alerts-panel glass-panel">
+                    <div class="panel-header">
+                        <h2>Emergency Alerts</h2>
+                        <div class="filter-controls">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn text-red" data-filter="critical">Critical</button>
+                        </div>
+                    </div>
+                    <div class="alerts-list" id="alerts-list">
+                        <!-- Alerts will be injected here via JS -->
+                    </div>
+                </section>
+
+                <div class="right-column">
+                    <!-- Map Container -->
+                    <section class="map-container glass-panel">
+                        <div class="panel-header">
+                            <h2>Live Tracking Map</h2>
+                        </div>
+                        <div id="map" class="map-view"></div>
+                    </section>
+
+                    <!-- Active Case Details -->
+                    <section class="case-details glass-panel" id="case-details-panel">
+                        <!-- Details will be injected here via JS -->
+                        <div class="empty-state">
+                            <i class="ph ph-hand-pointing"></i>
+                            <p>Select an alert to view details</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
