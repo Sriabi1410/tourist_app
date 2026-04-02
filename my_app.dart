@@ -1,3 +1,0 @@
-class MyApp {
-  const MyApp();
-}
